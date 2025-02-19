@@ -1,0 +1,37 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to AWS ECR
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region us-west-2
+          aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 816069149838.dkr.ecr.us-west-2.amazonaws.com/lldfy/lldfysubmissionmanager
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t my-python-app .
+          docker tag my-python-app:latest 816069149838.dkr.ecr.us-west-2.amazonaws.com/lldfy/lldfysubmissionmanager
+          docker push 816069149838.dkr.ecr.us-west-2.amazonaws.com/lldfy/lldfysubmissionmanager
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster my-cluster --service my-service --force-new-deployment
