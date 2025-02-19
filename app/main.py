@@ -9,7 +9,7 @@ app = FastAPI(
     description="API to handle multi-file code submissions and execution",
     version="1.0.0",
 )
-#minor
+#minors
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Include API routes
