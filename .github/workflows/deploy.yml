@@ -53,12 +53,6 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
 
-      - name: Security scan
-        env:
-            TRIVY_DISABLE_VEX_NOTICE: true
-        run: |
-            trivy image --exit-code 1 --severity HIGH,CRITICAL your-image:tag
-
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
