@@ -8,8 +8,8 @@ on:
 env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY: lldfy/lldfysubmissionmanager
-  ECS_CLUSTER: my-cluster
-  ECS_SERVICE: my-service
+  ECS_CLUSTER: lldfyai_cluster01
+  ECS_SERVICE: lldfysubmissionmanager
 
 jobs:
   deploy:
