@@ -5,37 +5,66 @@ on:
     branches:
       - code_dockerisation_for_deployment
 
+env:
+  AWS_REGION: us-west-2
+  ECR_REPOSITORY: lldfy/lldfysubmissionmanager
+  ECS_CLUSTER: my-cluster
+  ECS_SERVICE: my-service
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHubActions-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Verify AWS Identity
         run: aws sts get-caller-identity
 
       - name: Login to AWS ECR
+        id: ecr-login
         run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region us-west-2
-          aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 816069149838.dkr.ecr.us-west-2.amazonaws.com/lldfy/lldfysubmissionmanager
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
+          docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
 
-      - name: Build and Push Docker Image
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: |
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push Docker image
         run: |
-          docker build -t my-python-app .
-          docker tag my-python-app:latest 816069149838.dkr.ecr.us-west-2.amazonaws.com/lldfy/lldfysubmissionmanager
-          docker push 816069149838.dkr.ecr.us-west-2.amazonaws.com/lldfy/lldfysubmissionmanager
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+      - name: Security scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: 'table'
 
       - name: Deploy to ECS
         run: |
-          aws ecs update-service --cluster my-cluster --service my-service --force-new-deployment
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
