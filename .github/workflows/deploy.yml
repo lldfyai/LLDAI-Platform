@@ -52,7 +52,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
+      - name: Install Docker on EC2 Instance
+        run: |
+          # Install Docker
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
 
+          # Add ec2-user to docker group (avoid using sudo)
+          sudo usermod -aG docker ec2-user
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
