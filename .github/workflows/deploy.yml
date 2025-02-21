@@ -39,91 +39,33 @@ jobs:
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
           docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          driver: docker-container
-          driver-opts: network=host
-          install: true
-
       - name: Build and Push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           tags: |
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           push: true
-      - name: Install Docker on ECS EC2 Instances (via SSM)
-        run: |
-          INSTANCE_IDS=$(aws ec2 describe-instances \
-            --filters "Name=tag:aws:ecs:clusterName,Values=${{ env.ECS_CLUSTER }}" \
-            --query 'Reservations[].Instances[].InstanceId' \
-            --output text)
 
-          for INSTANCE_ID in $INSTANCE_IDS; do
-          aws ssm send-command \
-            --instance-ids $INSTANCE_ID \
-            --document-name "AWS-RunShellScript" \
-            --parameters 'commands=[
-              "sudo apt-get update -y",
-              "sudo apt-get install -y docker.io",
-              "sudo usermod -aG docker ec2-user",
-              "sudo systemctl restart docker",
-              "sudo chmod 666 /var/run/docker.sock"
-            ]' \
+      - name: Update Task Definition
+        run: |
+          NEW_TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE }} --region ${{ env.AWS_REGION }} | \
+            jq --arg IMAGE "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}" \
+            '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+          
+          aws ecs register-task-definition \
+            --family ${{ env.ECS_SERVICE }} \
+            --cli-input-json "$NEW_TASK_DEFINITION" \
             --region ${{ env.AWS_REGION }}
-          done
-      - name: Configure EC2 Docker Daemon
-        run: |
-          INSTANCE_IDS=$(aws ec2 describe-instances \
-            --filters "Name=tag:aws:ecs:clusterName,Values=${{ env.ECS_CLUSTER }}" \
-            --query 'Reservations[].Instances[].InstanceId' \
-            --output text)
 
-          for INSTANCE_ID in $INSTANCE_IDS; do
-            aws ssm send-command \
-              --instance-ids $INSTANCE_ID \
-              --document-name "AWS-RunShellScript" \
-              --parameters 'commands=[
-                "sudo groupmod -g 1001 docker",
-                "sudo usermod -aG docker ec2-user",
-                "sudo systemctl restart docker",
-                "sudo chmod 660 /var/run/docker.sock"
-              ]' \
-              --region ${{ env.AWS_REGION }} \
-              --output text \
-              --query "Command.CommandId"
-          done
-      - name: Update ECS Task Definition
+      - name: Deploy to ECS
         run: |
-          # Register new task definition with docker socket mount
-          CONTAINER_DEFINITION=$(cat <<EOF
-          [
-            {
-              "name": "app",
-              "image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}",
-              "memoryReservation": 512,
-              "cpu": 512,
-              "mountPoints": [
-                {
-                  "sourceVolume": "docker-sock",
-                  "containerPath": "/var/run/docker.sock",
-                  "readOnly": false
-                }
-              ],
-              "portMappings": [
-                {
-                  "containerPort": 8000,
-                  "hostPort": 8000,
-                  "protocol": "tcp"
-                }
-              ],
-              "essential": true
-            }
-          ]
+          aws ecs update-service \
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service ${{ env.ECS_SERVICE }} \
+          --task-definition ${{ env.ECS_SERVICE }} \
+          --force-new-deployment \
+          --region ${{ env.AWS_REGION }}
           EOF
           )
 
@@ -133,12 +75,4 @@ jobs:
             --volumes '[{"name": "docker-sock", "host": {"sourcePath": "/var/run/docker.sock"}}]' \
             --network-mode bridge \
             --requires-compatibilities EC2 \
-            --region ${{ env.AWS_REGION }}
-
-      - name: Deploy to ECS
-        run: |
-          aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.ECS_SERVICE }} \
-            --force-new-deployment \
             --region ${{ env.AWS_REGION }}
