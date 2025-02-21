@@ -5,10 +5,10 @@ RUN apt-get update && \
     apt-get install -y docker.io && \
     apt-get clean
 
-# Create a docker group and add non-root user
-RUN groupadd -g 999 docker && \
-    useradd -u 1000 -g docker -m appuser && \
-    mkdir -p /var/run/docker.sock
+# Use existing docker group and create app user
+RUN useradd -u 1000 -g docker -m appuser && \
+    mkdir -p /app && \
+    chown appuser:docker /app
 
 USER appuser
 
