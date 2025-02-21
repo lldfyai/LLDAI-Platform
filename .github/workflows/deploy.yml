@@ -72,7 +72,23 @@ jobs:
             ]' \
             --region ${{ env.AWS_REGION }}
           done
-
+      - name: Configure EC2 Docker Daemon
+        run: |
+          aws ssm send-command \
+            --instance-ids $(aws ec2 describe-instances \
+              --filters "Name=tag:aws:ecs:clusterName,Values=${{ env.ECS_CLUSTER }}" \
+              --query 'Reservations[].Instances[].InstanceId' \
+              --output text) \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "sudo groupmod -g 998 docker",
+              "sudo usermod -aG docker ec2-user",
+              "sudo systemctl restart docker",
+              "sudo chmod 666 /var/run/docker.sock",
+              "sudo sysctl -w vm.overcommit_memory=1",
+              "sudo sysctl -w vm.drop_caches=1"
+            ]' \
+            --region ${{ env.AWS_REGION }}
       - name: Update ECS Task Definition
         run: |
           # Register new task definition with docker socket mount

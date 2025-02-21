@@ -14,7 +14,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Include API routes from submission_handler
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
-
+@app.get("/health")
+def health_check():
+    return True
 # New mock REST API endpoint
 @app.get("/api/v1/mock")
 def read_mock():

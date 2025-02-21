@@ -1,12 +1,11 @@
 FROM python:3.11-slim
 
-# Install Docker CLI and dependencies
+# Install Docker CLI with matching GID
 RUN apt-get update && \
     apt-get install -y docker.io && \
-    apt-get clean
-
-# Use existing docker group and create app user
-RUN useradd -u 1000 -g docker -m appuser && \
+    apt-get clean && \
+    groupmod -g 998 docker && \
+    useradd -u 1000 -g docker -m appuser && \
     mkdir -p /app && \
     chown appuser:docker /app
 
