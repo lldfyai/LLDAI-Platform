@@ -1,10 +1,10 @@
 FROM python:3.11-slim
 
-# Install Docker CLI with matching GID
+# Install Docker CLI with non-conflicting GID
 RUN apt-get update && \
     apt-get install -y docker.io && \
     apt-get clean && \
-    groupmod -g 998 docker && \
+    groupmod -g 1001 docker && \
     useradd -u 1000 -g docker -m appuser && \
     mkdir -p /app && \
     chown appuser:docker /app

@@ -81,12 +81,10 @@ jobs:
               --output text) \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
-              "sudo groupmod -g 998 docker",
+              "sudo groupmod -g 1001 docker",
               "sudo usermod -aG docker ec2-user",
               "sudo systemctl restart docker",
-              "sudo chmod 666 /var/run/docker.sock",
-              "sudo sysctl -w vm.overcommit_memory=1",
-              "sudo sysctl -w vm.drop_caches=1"
+              "sudo chmod 660 /var/run/docker.sock"
             ]' \
             --region ${{ env.AWS_REGION }}
       - name: Update ECS Task Definition
