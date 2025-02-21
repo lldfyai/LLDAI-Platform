@@ -76,21 +76,36 @@ jobs:
       - name: Update ECS Task Definition
         run: |
           # Register new task definition with docker socket mount
+          CONTAINER_DEFINITION=$(cat <<EOF
+          [
+            {
+              "name": "app",
+              "image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}",
+              "memoryReservation": 512,
+              "cpu": 512,
+              "mountPoints": [
+                {
+                  "sourceVolume": "docker-sock",
+                  "containerPath": "/var/run/docker.sock",
+                  "readOnly": false
+                }
+              ],
+              "portMappings": [
+                {
+                  "containerPort": 8000,
+                  "hostPort": 8000,
+                  "protocol": "tcp"
+                }
+              ],
+              "essential": true
+            }
+          ]
+          EOF
+          )
+
           aws ecs register-task-definition \
             --family ${{ env.ECS_SERVICE }} \
-            --container-definitions "$(echo '[
-              {
-                "name": "app",
-                "image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}",
-                "mountPoints": [
-                  {
-                    "sourceVolume": "docker-sock",
-                    "containerPath": "/var/run/docker.sock"
-                  }
-                ],
-                "portMappings": [{"containerPort": 8000}]
-              }
-            ]' | envsubst)" \
+            --container-definitions "$CONTAINER_DEFINITION" \
             --volumes '[{"name": "docker-sock", "host": {"sourcePath": "/var/run/docker.sock"}}]' \
             --network-mode bridge \
             --requires-compatibilities EC2 \
