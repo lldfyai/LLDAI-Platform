@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from app.routes import submission_handler
 import os
 from app.config import UPLOAD_DIR
 
@@ -11,9 +10,6 @@ app = FastAPI(
 
 # Ensure upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# Include API routes from submission_handler
-app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
 @app.get("/health")
 def health_check():
     return True
