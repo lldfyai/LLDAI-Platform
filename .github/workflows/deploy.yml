@@ -52,16 +52,50 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
-      - name: Install Docker on EC2 Instance
+      - name: Install Docker on ECS EC2 Instances (via SSM)
         run: |
-          # Install Docker
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-          sudo systemctl start docker
-          sudo systemctl enable docker
+          INSTANCE_IDS=$(aws ec2 describe-instances \
+            --filters "Name=tag:aws:ecs:clusterName,Values=${{ env.ECS_CLUSTER }}" \
+            --query 'Reservations[].Instances[].InstanceId' \
+            --output text)
 
-          # Add ec2-user to docker group (avoid using sudo)
-          sudo usermod -aG docker ec2-user
+          for INSTANCE_ID in $INSTANCE_IDS; do
+          aws ssm send-command \
+            --instance-ids $INSTANCE_ID \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "sudo apt-get update -y",
+              "sudo apt-get install -y docker.io",
+              "sudo usermod -aG docker ec2-user",
+              "sudo systemctl restart docker",
+              "sudo chmod 666 /var/run/docker.sock"
+            ]' \
+            --region ${{ env.AWS_REGION }}
+          done
+
+      - name: Update ECS Task Definition
+        run: |
+          # Register new task definition with docker socket mount
+          aws ecs register-task-definition \
+            --family ${{ env.ECS_SERVICE }} \
+            --container-definitions "$(echo '[
+              {
+                "name": "app",
+                "image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}",
+                "mountPoints": [
+                  {
+                    "sourceVolume": "docker-sock",
+                    "containerPath": "/var/run/docker.sock"
+                  }
+                ],
+                "portMappings": [{"containerPort": 8000}]
+              }
+            ]' | envsubst)" \
+            --volumes '[{"name": "docker-sock", "host": {"sourcePath": "/var/run/docker.sock"}}]' \
+            --network-mode bridge \
+            --requires-compatibilities EC2 \
+            --region ${{ env.AWS_REGION }}
+
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
