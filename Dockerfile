@@ -10,10 +10,6 @@ RUN groupadd -g 1001 dockergroup && \
     useradd -u 1001 -g dockergroup -m appuser && \
     usermod -aG docker appuser
 
-# Configure Docker socket permissions
-RUN mkdir -p /var/run/docker.sock && \
-    chown appuser:dockergroup /var/run/docker.sock
-
 USER appuser
 WORKDIR /app
 
