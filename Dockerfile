@@ -1,18 +1,23 @@
 FROM python:3.11-slim
 
-# Install Docker CLI with non-conflicting GID
+# Install Docker CLI and dependencies
 RUN apt-get update && \
     apt-get install -y docker.io && \
-    apt-get clean && \
-    groupmod -g 1001 docker && \
-    useradd -u 1000 -g docker -m appuser && \
-    mkdir -p /app && \
-    chown appuser:docker /app
+    apt-get clean
+
+# Create application user with docker group access
+RUN groupadd -g 1001 dockergroup && \
+    useradd -u 1001 -g dockergroup -m appuser && \
+    usermod -aG docker appuser
+
+# Configure Docker socket permissions
+RUN mkdir -p /var/run/docker.sock && \
+    chown appuser:dockergroup /var/run/docker.sock
 
 USER appuser
-
 WORKDIR /app
-COPY --chown=appuser:docker . .
+
+COPY --chown=appuser:dockergroup . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
