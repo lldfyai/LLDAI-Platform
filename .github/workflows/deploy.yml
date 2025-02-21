@@ -4,12 +4,16 @@ on:
   push:
     branches:
       - code_dockerisation_for_deployment
+permissions:
+      id-token: write
+      contents: read
 
 env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY: lldfy/lldfysubmissionmanager
   ECS_CLUSTER: lldfyai_cluster1
   ECS_SERVICE: lldfyManager
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
   deploy:
@@ -74,19 +78,25 @@ jobs:
           done
       - name: Configure EC2 Docker Daemon
         run: |
-          aws ssm send-command \
-            --instance-ids $(aws ec2 describe-instances \
-              --filters "Name=tag:aws:ecs:clusterName,Values=${{ env.ECS_CLUSTER }}" \
-              --query 'Reservations[].Instances[].InstanceId' \
-              --output text) \
-            --document-name "AWS-RunShellScript" \
-            --parameters 'commands=[
-              "sudo groupmod -g 1001 docker",
-              "sudo usermod -aG docker ec2-user",
-              "sudo systemctl restart docker",
-              "sudo chmod 660 /var/run/docker.sock"
-            ]' \
-            --region ${{ env.AWS_REGION }}
+          INSTANCE_IDS=$(aws ec2 describe-instances \
+            --filters "Name=tag:aws:ecs:clusterName,Values=${{ env.ECS_CLUSTER }}" \
+            --query 'Reservations[].Instances[].InstanceId' \
+            --output text)
+
+          for INSTANCE_ID in $INSTANCE_IDS; do
+            aws ssm send-command \
+              --instance-ids $INSTANCE_ID \
+              --document-name "AWS-RunShellScript" \
+              --parameters 'commands=[
+                "sudo groupmod -g 1001 docker",
+                "sudo usermod -aG docker ec2-user",
+                "sudo systemctl restart docker",
+                "sudo chmod 660 /var/run/docker.sock"
+              ]' \
+              --region ${{ env.AWS_REGION }} \
+              --output text \
+              --query "Command.CommandId"
+          done
       - name: Update ECS Task Definition
         run: |
           # Register new task definition with docker socket mount
