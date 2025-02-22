@@ -1,7 +1,7 @@
 name: Deploy to AWS
 on:
   push:
-    branches: [ main, code_dockerisation_for_deployment ]
+    branches: code_dockerisation_for_deployment
 permissions:
   id-token: write
   contents: read
