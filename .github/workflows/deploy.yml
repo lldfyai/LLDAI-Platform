@@ -10,7 +10,7 @@ permissions:
 
 env:
   AWS_REGION: us-west-2
-  ECR_REPOSITORY: lldfy/lldfysubmissionmanager
+  ECR_REPOSITORY: lldfy-app
   ECS_CLUSTER: lldfyai_cluster
   ECS_SERVICE: lldfyManager
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -41,7 +41,7 @@ jobs:
           docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest .
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
 
-      - name: Update task definition
+      - name: Update task defini tion
         run: |
           # Get the current task definition
           TASK_DEFINITION=$(aws ecs describe-task-definition \
