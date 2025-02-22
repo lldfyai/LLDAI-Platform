@@ -41,14 +41,29 @@ jobs:
           docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest .
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
 
-      - name: Update task defini tion
+      - name: Update task definition
         run: |
-          # Get the current task definition
-          TASK_DEFINITION=$(aws ecs describe-task-definition \
+            # Get the current task definition
+            TASK_DEFINITION=$(aws ecs describe-task-definition \
             --task-definition ${{ env.ECS_SERVICE }} \
             --region ${{ env.AWS_REGION }})
-          
-          # Update the image tag to "latest"
-          UPDATED_TASK_DEFINITION=$(echo $TASK_DEFINITION | \
+            
+            # Update the image tag to "latest"
+            UPDATED_TASK_DEFINITION=$(echo $TASK_DEFINITION | \
             jq --arg IMAGE "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest" \
             '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+            
+            # Register the updated task definition
+            aws ecs register-task-definition \
+            --family ${{ env.ECS_SERVICE }} \
+            --cli-input-json "$UPDATED_TASK_DEFINITION" \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Update ECS service
+        run: |
+                aws ecs update-service \
+                  --cluster ${{ env.ECS_CLUSTER }} \
+                  --service ${{ env.ECS_SERVICE }} \
+                  --task-definition ${{ env.ECS_SERVICE }} \
+                  --force-new-deployment \
+                  --region ${{ env.AWS_REGION }}
