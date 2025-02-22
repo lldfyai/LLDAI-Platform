@@ -10,6 +10,8 @@ app = FastAPI(
 
 # Ensure upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+#minor
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
