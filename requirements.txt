@@ -1,4 +1,2 @@
-fastapi
-uvicorn
-docker
-python-multipart
+fastapi>=0.68.0
+uvicorn>=0.15.0
