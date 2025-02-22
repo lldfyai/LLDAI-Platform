@@ -12,7 +12,7 @@ app = FastAPI(
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 @app.get("/health")
 def health_check():
-    return True
+    return {"status": "healthy"}
 # New mock REST API endpoint
 @app.get("/api/v1/mock")
 def read_mock():
