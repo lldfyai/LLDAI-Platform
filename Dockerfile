@@ -1,5 +1,5 @@
 FROM python:3.9-slim
-
+EXPOSE 80
 WORKDIR /app
 
 # Install system dependencies first
