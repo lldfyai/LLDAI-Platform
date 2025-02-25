@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="AWS ECS FastAPI Demo")
 
-# CORS Configurationcomment
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
