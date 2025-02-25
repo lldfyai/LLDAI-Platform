@@ -1,16 +1,23 @@
-FROM python:3.9-slim
-EXPOSE 80
+# Stage 1: Build
+FROM python:3.11-slim as builder
+
 WORKDIR /app
 
-# Install system dependencies first
-RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --user --no-cache-dir -r requirements.txt
 
-COPY . .
+# Stage 2: Runtime
+FROM python:3.11-slim
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+WORKDIR /app
+
+# Copy installed dependencies
+COPY --from=builder /root/.local /root/.local
+COPY ./app /app
+
+# Ensure scripts in .local are usable
+ENV PATH=/root/.local/bin:$PATH
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
