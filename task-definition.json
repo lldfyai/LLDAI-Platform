@@ -48,6 +48,5 @@
   "runtimePlatform": {
     "cpuArchitecture": "ARM64",
     "operatingSystemFamily": "LINUX"
-  },
-  "enableFaultInjection": false
+  }
 }
