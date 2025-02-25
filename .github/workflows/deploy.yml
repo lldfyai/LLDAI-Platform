@@ -13,6 +13,7 @@ env:
   ECR_REPOSITORY: fastapi-app
   ECS_CLUSTER: fastapi-cluster
   ECS_SERVICE: fastapi-production-service
+  CONTAINER_NAME: fastapi-container
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 jobs:
   deploy:
