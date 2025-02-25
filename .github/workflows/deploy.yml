@@ -12,7 +12,7 @@ env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY: fastapi-app
   ECS_CLUSTER: fastapi-cluster
-  ECS_SERVICE: lldfyManager
+  ECS_SERVICE: fastapi-production-service
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 jobs:
   deploy:
