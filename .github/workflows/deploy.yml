@@ -12,7 +12,7 @@ env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY: fastapi-app
   ECS_CLUSTER: LLDAI-Cluster
-  ECS_SERVICE: fastapi-production-service
+  ECS_SERVICE: LLDAI-Service
   CONTAINER_NAME: fastapi-container
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 jobs:
