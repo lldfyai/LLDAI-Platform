@@ -1,5 +1,5 @@
 # Stage 1: Build (explicitly use x86_64)
-FROM --platform=linux/arm64/v8 python:3.11-slim as builder
+FROM --platform=linux/amd64 python:3.11-slim as builder
 
 
 WORKDIR /app
@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime (match platform)
-FROM --platform=linux/arm64/v8 python:3.11-slim
+FROM --platform=linux/amd64 python:3.11-slim
 
 WORKDIR /app
 COPY --from=builder /root/.local /root/.local
