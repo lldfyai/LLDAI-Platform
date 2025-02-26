@@ -14,7 +14,7 @@ app = FastAPI(
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# Include API routes
+# Include API routes comment
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
