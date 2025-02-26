@@ -1,6 +1,7 @@
 # Stage 1: Build (explicitly use x86_64)
 FROM --platform=linux/arm64/v8 python:3.11-slim as builder
 
+
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
@@ -14,6 +15,7 @@ COPY ./app /app
 
 ENV PATH=/root/.local/bin:$PATH
 ENV PYTHONPATH=/app
+
 EXPOSE 8000
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
