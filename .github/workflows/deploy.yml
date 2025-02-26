@@ -11,7 +11,7 @@ permissions:
 env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY: fastapi-app
-  ECS_CLUSTER: LLDAI-Cluster
+  ECS_CLUSTER: lldfyai_cluster
   ECS_SERVICE: LLDAI-Service
   CONTAINER_NAME: fastapi-container
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
