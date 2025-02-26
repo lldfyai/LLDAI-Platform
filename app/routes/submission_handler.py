@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 import os
 import shutil
 import uuid
-from app.config import UPLOAD_DIR
-from app.services.code_executor import CodeExecutor
+from config import UPLOAD_DIR
+from services.code_executor import CodeExecutor
 from enum import Enum
 from pydantic import BaseModel
 

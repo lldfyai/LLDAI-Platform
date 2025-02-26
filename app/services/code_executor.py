@@ -1,6 +1,6 @@
 import docker
 import os
-from app.config import LANGUAGE_CONFIG, UPLOAD_DIR
+from config import LANGUAGE_CONFIG, UPLOAD_DIR
 import docker
 
 class CodeExecutor:
