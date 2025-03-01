@@ -2,7 +2,18 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
+    File outputFile = new File("stdout.txt");
+    PrintStream originalOut = new PrintStream(outputFile);
+    PrintStream console = System.out;
+    System.setOut(originalOut);
+
+    File errorFile = new File("stderr.txt");
+    PrintStream errorStream = new PrintStream(errorFile);
+
+    File resultsFile = new File("results.properties");
+    Properties resultsProps = new Properties();
+
     try {
 
       List<String> inputLines = readLines("test_input.txt");
@@ -12,6 +23,12 @@ public class Main {
       Iterator<String> expectedIterator = expectedLines.iterator();
 
       int testCaseNum = 1;
+      
+      int totalTestCases = countTestCases(inputLines);
+
+
+      long startTime = System.currentTimeMillis(); // Start time
+
       while (inputIterator.hasNext()) {
         // Read board size and number of players
         int boardSize = Integer.parseInt(inputIterator.next().trim());
@@ -32,7 +49,6 @@ public class Main {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PrintStream printStream = new PrintStream(outputStream);
-        PrintStream originalOut = System.out;
         System.setOut(printStream);
 
         simulateTestCase(boardSize, numPlayers, playerNames, testCaseInput);
@@ -42,14 +58,10 @@ public class Main {
         String actualOutput = outputStream.toString().trim();
 
         // Use the OutputComparator for comparing the output
-        boolean result = OutputComparator.compareOutputs(testCaseNum, actualOutput, expectedIterator);
+        boolean result = OutputComparator.compareOutputs(testCaseNum, actualOutput, expectedIterator, resultsProps);
 
         if (!result) {
-          System.out.println("Test Case Failed");
-          System.out.println("Actual Output:");
-          System.out.println(actualOutput);
-          System.out.println("Expected Output:");
-          System.out.println(expectedIterator.next());
+          resultsProps.setProperty("failedTestCaseNum", String.valueOf(testCaseNum));
           break;
         }
 
@@ -61,8 +73,21 @@ public class Main {
       if (!inputIterator.hasNext()) {
         System.out.println("All test cases passed");
       }
-    } catch (IOException e) {
-      e.printStackTrace();
+      long endTime = System.currentTimeMillis(); // End time
+      long executionTime = endTime - startTime; // Execution time
+
+      resultsProps.setProperty("totalTestCases", String.valueOf(totalTestCases));
+      resultsProps.setProperty("testsPassed", String.valueOf(testCaseNum-1));
+      resultsProps.setProperty("execTime", String.valueOf(executionTime) + "ms");
+
+      try (FileOutputStream fos = new FileOutputStream(resultsFile)) {
+        resultsProps.store(fos, null);
+      } catch (IOException e) {
+        errorStream.println(e);
+      }
+
+    } catch (Exception e) {
+      errorStream.println(e);
     }
   }
 
@@ -130,5 +155,15 @@ public class Main {
     }
     reader.close();
     return lines;
+  }
+
+  private static int countTestCases(List<String> inputLines) {
+    int count = 1;
+    for (String line : inputLines) {
+      if (line.isEmpty()) {
+        count++;
+      }
+    }
+    return count;
   }
 }
