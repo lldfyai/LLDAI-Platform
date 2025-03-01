@@ -1,7 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 import os
-import shutil
 import uuid
 from app.config import UPLOAD_DIR
 from app.services.code_executor import CodeExecutor
