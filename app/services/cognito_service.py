@@ -6,7 +6,11 @@ import boto3
 from app.config import CLIENT_ID, CLIENT_SECRET, USER_POOL_ID
 
 cognito = boto3.client("cognito-idp", region_name="us-west-2")
-
+def get_secret_hash_using_client_id(username, client_id):
+    """Generate SECRET_HASH for Cognito authentication."""
+    message = username + client_id
+    dig = hmac.new(CLIENT_SECRET.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).digest()
+    return base64.b64encode(dig).decode()
 def get_secret_hash(username: str) -> str:
     """Compute Cognito secret hash for authentication."""
     msg = username + CLIENT_ID
@@ -17,7 +21,7 @@ def get_login_token(email: str, username: str, password: str) -> str:
         auth_params = {
             "USERNAME": username if username else email,
             "PASSWORD": password,
-            "SECRET_HASH": get_secret_hash(username, CLIENT_ID)
+            "SECRET_HASH": get_secret_hash_using_client_id(username, CLIENT_ID)
         }
         auth_response = cognito.initiate_auth(
             ClientId=CLIENT_ID,
@@ -49,10 +53,18 @@ def register_cognito_user(username: str, email: str, password: str):
             Permanent=True
         )
         # Confirm user sign up
-        cognito.admin_confirm_sign_up(
-            UserPoolId=USER_POOL_ID,
-            Username=username
-        )
+        # Try to confirm the user signup
+        try:
+            cognito.admin_confirm_sign_up(
+                UserPoolId=USER_POOL_ID,
+                Username=username
+            )
+        except cognito.exceptions.NotAuthorizedException as e:
+            # If the user is already confirmed, ignore this error.
+            if "User cannot be confirmed. Current status is CONFIRMED" in str(e):
+                pass
+            else:
+                raise
     except cognito.exceptions.UsernameExistsException:
         raise Exception("Username already exists")
 

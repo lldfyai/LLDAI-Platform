@@ -20,11 +20,11 @@ def resolve_register(_, info, input):
     username = input.get("username")
     email = input.get("email")
     password = input.get("password")
-    github_code = input.get("githubCode")
+    github_token = input.get("githubToken")
     if not email:
-        if not github_code:
+        if not github_token:
             raise Exception("GitHub OAuth code required if username or email is missing")
-        token = github_service.get_github_access_token(github_code)
+        token = github_token
         if not username:
             username = github_service.get_github_username(token)
         email = github_service.get_github_primary_email(token)

@@ -48,7 +48,7 @@ def fetch_problems_metadata() -> List[Tuple[int, str, str, list]]:
 
 def put_user(username: str, email: str, created_at: int):
     try:
-        query = 'INSERT INTO users (username, email, created_at) VALUES (%s, %s, %s);'
+        query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s);'
         cursor.execute(query, (username, email, created_at))
         conn.commit()
     except Exception as e:

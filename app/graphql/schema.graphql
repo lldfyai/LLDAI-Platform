@@ -22,7 +22,7 @@ input LoginInput {
 }
 
 input RegisterInput {
-    githubCode: String
+    githubToken: String
     username: String
     email: String
     password: String!
