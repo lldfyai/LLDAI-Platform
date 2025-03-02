@@ -18,6 +18,17 @@ env:
   ECS_SERVICE: lldfyManager1
   CONTAINER_NAME: lldai-container
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  OAUTH2_CLIENT_SECRET: ${{ secrets.OAUTH2_CLIENT_SECRET}}
+  OAUTH2_CLIENT_ID: ${{ secrets.OAUTH2_CLIENT_ID}}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD}}
+  DB_USER: ${{ secrets.DB_USER}}
+  DB_NAME: ${{ secrets.DB_NAME}}
+  DB_HOST: ${{ secrets.DB_HOST}}
+  USER_POOL_ID: ${{ secrets.USER_POOL_ID}}
+  COGNITO_CLIENT_ID: ${{ secrets.CLIENT_ID}}
+  COGNITO_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET}}
 jobs:
   pr-build:
     name: PR Build Check

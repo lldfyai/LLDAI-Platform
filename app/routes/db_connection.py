@@ -13,7 +13,7 @@ port = DB_PORT
 
 # Establish the connection
 conn = psycopg2.connect(
-    dbname="lldfy_db",
+    dbname=DB_NAME,
     user=user,
     password=password,
     host=host,
