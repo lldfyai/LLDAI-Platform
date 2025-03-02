@@ -13,7 +13,7 @@ port = DB_PORT
 
 # Establish the connection
 conn = psycopg2.connect(
-    dbname="postgres",
+    dbname="lldfy_db",
     user=user,
     password=password,
     host=host,
@@ -46,10 +46,11 @@ def fetch_problems_metadata() -> List[Tuple[int, str, str, list]]:
         if conn is not None:
             conn.close()
 
-def put_user(username: str, email: str, created_at: int):
+def put_user(userName: str, email: str):
     try:
-        query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s);'
-        cursor.execute(query, (username, email, created_at))
+        # Quote the column "userName" to preserve the case
+        query = 'INSERT INTO public."UserMetadata" ("userName", email) VALUES (%s, %s);'
+        cursor.execute(query, (userName, email))
         conn.commit()
     except Exception as e:
         print("Error inserting user:", e)
