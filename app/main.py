@@ -5,8 +5,7 @@ from ariadne.asgi import GraphQL
 from app.graphql.schema import schema
 from config import UPLOAD_DIR 
 from fastapi.middleware.cors import CORSMiddleware
-
-
+from routes.create_problem import router as create_problem_router
 
 app = FastAPI(
     title="LLDify Platform",
@@ -25,6 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
+app.include_router(create_problem_router, prefix="/api/v1", tags=["Problem Management"])
 graphql_app = GraphQL(schema, debug=True)
 app.add_route("/graphql", graphql_app)
 @app.get("/")
@@ -35,5 +35,7 @@ def read_root():
 def read_root():
     return {"message": "Healthyyyy!"}
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+# Run the application using uvicorn
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

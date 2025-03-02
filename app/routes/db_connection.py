@@ -18,7 +18,7 @@ port = DB_PORT
 
 # Establish the connection
 conn = psycopg2.connect(
-    dbname="postgres",
+    dbname="lldfy_db",
     user=user,
     password=password,
     host=host,
@@ -92,7 +92,6 @@ def fetch_problem_metadata(problem_id: int) -> Optional[Dict[str, Any]]:
 def insert_problem_metadata(
         problemTitle: str,
         difficulty: str,
-        problemId: Optional[int] = None,
         Tags: Optional[List[str]] = None,
         timeLimit: Optional[float] = None,
         memoryLimit: Optional[float] = None,
@@ -102,19 +101,14 @@ def insert_problem_metadata(
     try:
         # Modify the query to include the problemId and use NULL on SQL side if it's not provided
         query = '''
-        INSERT INTO public."ProblemMetadata" ("problemId", "problemTitle", difficulty, "Tags", "timeLimit", "memoryLimit", s3_path, description)
+        INSERT INTO public."ProblemMetadata" ("problemTitle", difficulty, "Tags", "timeLimit", "memoryLimit", s3_path, description)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
         '''
-        cursor.execute(query, (problemId if problemId is not None else 'DEFAULT', problemTitle, difficulty, Tags, timeLimit, memoryLimit, s3_path, description))
+        cursor.execute(query, (problemTitle, difficulty, Tags, timeLimit, memoryLimit, s3_path, description))
         conn.commit()
     except Exception as e:
         conn.rollback()
         raise e
-
-    finally:
-        # Close the database connection
-        if conn is not None:
-            conn.close()
 
 def put_user(username: str, email: str, created_at: int):
     try:
@@ -123,6 +117,7 @@ def put_user(username: str, email: str, created_at: int):
         conn.commit()
     except Exception as e:
         print("Error inserting user:", e)
+
     finally:
         cursor.close()
         conn.close()

@@ -85,4 +85,17 @@ def resolve_reset_password(_, info, input):
     except Exception as e:
         return str(e)
 
+
+@query.field("problems")
+def resolve_problems(*_):
+    problems_metadata = db_connection.fetch_problems_metadata()
+    return problems_metadata
+
+@query.field("problem")
+def resolve_problem(_, info, problemId):
+    problem_metadata = db_connection.fetch_problem_metadata(problemId)
+    if problem_metadata is None:
+        raise Exception(f"Problem with ID {problemId} not found")
+    return problem_metadata
+
 resolvers = [query, mutation]

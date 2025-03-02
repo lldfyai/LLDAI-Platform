@@ -57,4 +57,14 @@ type Mutation {
 
 type Query {
     githubUsernameEmail(input: GithubUsernameEmailInput!): GithubUserDetails!
+    problems: [Problem]
+    problem(problemId: Int!): Problem
+}
+
+type Problem {
+problemId: Int
+problemTitle: String
+difficulty: String
+Tags: [String]
+description: String
 }

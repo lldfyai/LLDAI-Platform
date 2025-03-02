@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter,FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from db_connection import insert_problem_metadata  # Make sure this is imported correctly
+from app.routes.db_connection import insert_problem_metadata
 
-app = FastAPI()
+router = APIRouter()
 
 # Define a Pydantic model that corresponds to your data input
 class Problem(BaseModel):
@@ -17,13 +17,12 @@ class Problem(BaseModel):
     description: Optional[str] = None
 
 # Create an API endpoint to insert new problem metadata into the database
-@app.post("/create_problem/")
+@router.post("/create_problem/")
 async def create_problem(problem: Problem):
     try:
         insert_problem_metadata(
             problemTitle=problem.problemTitle,
             difficulty=problem.difficulty,
-            problemId=problem.problemId,
             Tags=problem.Tags,
             timeLimit=problem.timeLimit,
             memoryLimit=problem.memoryLimit,
