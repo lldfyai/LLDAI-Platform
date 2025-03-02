@@ -37,16 +37,16 @@ class SubmissionHandler:
 
     async def handle_submission(self, submission_id, files_metadata, language, user_id, problem_id):
         
-        await asyncio.sleep(25)  # Simulate processing delay
+        #await asyncio.sleep(25)  # Simulate processing delay
         submission_folder = os.path.join(UPLOAD_DIR, user_id, problem_id, submission_id)
         os.makedirs(submission_folder, exist_ok=True)
 
         await self.save_files(files_metadata, submission_folder)
         self.submission_store[submission_id]["state"] = SubmissionState.PROCESSING.value
 
-        await asyncio.sleep(25)  # Simulate processing delay
+        # await asyncio.sleep(25)  # Simulate processing delay
 
-        result = self.executor.execute_code_in_docker(submission_id, language, submission_folder)
+        result = self.executor.execute_code_in_docker(submission_id, problem_id, language, submission_folder)
 
         self.submission_store[submission_id]["state"] = SubmissionState.COMPLETED.value
         self.submission_store[submission_id]["result"] = result

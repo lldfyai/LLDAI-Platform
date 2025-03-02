@@ -2,6 +2,9 @@ import docker
 import os
 from config import LANGUAGE_CONFIG, UPLOAD_DIR
 import docker
+from io import BytesIO
+import tarfile
+from models.CodeExecResponseModel import CodeExecResponseModel
 
 class CodeExecutor:
     def __init__(self):
@@ -25,9 +28,11 @@ class CodeExecutor:
             return None, f"Error building Docker image: {str(e)}"
 
     """Runs Java code inside the dynamically built Docker container."""        
-    def execute_code_in_docker(self, submission_id, language, submission_folder):
+    def execute_code_in_docker(self, submission_id, problem_id, language, submission_folder):
         # Ensure the Docker image is built
         abs_submission_folder = os.path.abspath(submission_folder)
+        output_folder = os.path.join(abs_submission_folder, "output")
+        os.makedirs(output_folder, exist_ok=True)
         image_name, error = self.build_docker_image(language, submission_folder)
         if not image_name:
             return {"status": "Error", "output": error}
@@ -36,12 +41,77 @@ class CodeExecutor:
             container = self.client.containers.run(
                 image=image_name, 
                 working_dir="/app",
-                remove=True,
+                detach=True,
                 stdout=True,
                 stderr=True
             )
-            return {"status": "Success", "output": container.decode()}
+            container.wait()  # Wait for the container to finish
+            
+            # Copy generated files from the container to the host
+            generated_files = ["results.properties", "stdout.txt", "stderr.txt"]
+            for file_name in generated_files:
+                src_path = f"/app/output/{file_name}"
+                dest_path = os.path.join(output_folder, file_name)
+                self.copy_file_from_container(container.id, src_path, dest_path)
+            
+            container.remove()  # Remove the container after copying files
+            response = self.generate_response_model(submission_id, problem_id, language, output_folder)
+            return {"status": "Success", "output": response}
         except docker.errors.ContainerError as e:
             return {"status": "Execution Failed", "output": str(e.stderr.decode())}
         except Exception as e:
             return {"status": "Error", "output": str(e)}
+
+    def copy_file_from_container(self, container_id, src_path, dest_path):
+        container = self.client.containers.get(container_id)
+        tar_stream, _ = container.get_archive(src_path)
+        tar_data = BytesIO()
+        for chunk in tar_stream:
+            tar_data.write(chunk)
+        tar_data.seek(0)
+        with tarfile.open(fileobj=tar_data) as tar:
+            tar.extractall(path=os.path.dirname(dest_path))
+
+    def generate_response_model(self, submission_id, problem_id, lang, output_folder):
+      results_file = os.path.join(output_folder, "results.properties")
+      stdout_file = os.path.join(output_folder, "stdout.txt")
+      stderr_file = os.path.join(output_folder, "stderr.txt")
+    
+      results = {}
+      stdout = ""
+      stderr = ""
+
+      if os.path.exists(results_file):
+        with open(results_file, "r") as file:
+            results = dict(line.strip().split('=', 1) for line in file if '=' in line)
+
+      if os.path.exists(stdout_file):
+        with open(stdout_file, "r") as file:
+            stdout = file.read()
+    
+      if os.path.exists(stderr_file):
+        with open(stderr_file, "r") as file:
+            stderr = file.read()
+
+      response = CodeExecResponseModel.populate_response_model(
+        status_code=200,
+        lang=lang,
+        run_success=True,
+        exec_runtime=results.get("execTime", "N/A"),
+        memory="N/A",
+        problem_id=problem_id,
+        finished=True,
+        total_correct=int(results.get("testsPassed", 0)),
+        total_testcases=int(results.get("totalTestCases", 0)),
+        submission_id=submission_id,
+        status_msg="Execution completed",
+        evaluation_state="Completed",
+        failed_testcase=results.get("failedTestCaseNum"),
+        expected_output=results.get("expectedOutput"),
+        actual_output=results.get("actualOutput"),
+        error_msg="None"
+      )
+
+      return response        
+
+    

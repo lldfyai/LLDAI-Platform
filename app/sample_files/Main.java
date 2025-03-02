@@ -3,15 +3,21 @@ import java.util.*;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-    File outputFile = new File("stdout.txt");
+    String outputDir = "output";
+    File outputDirectory = new File(outputDir);
+    if (!outputDirectory.exists()) {
+      outputDirectory.mkdirs(); // Create the directory if it doesn't exist
+    }
+
+    File outputFile = new File(outputDir + "/stdout.txt");
     PrintStream originalOut = new PrintStream(outputFile);
     PrintStream console = System.out;
     System.setOut(originalOut);
 
-    File errorFile = new File("stderr.txt");
+    File errorFile = new File(outputDir + "/stderr.txt");
     PrintStream errorStream = new PrintStream(errorFile);
 
-    File resultsFile = new File("results.properties");
+    File resultsFile = new File(outputDir + "/results.properties");
     Properties resultsProps = new Properties();
 
     try {
