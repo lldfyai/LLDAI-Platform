@@ -1,0 +1,68 @@
+{
+  "family": "lldfyTasksFamily",
+  "containerDefinitions": [
+    {
+      "name": "lldai-container",
+      "image": "816069149838.dkr.ecr.us-west-2.amazonaws.com/fastapi-app:latest",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "name": "lldai-container-8000-tcp",
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "DOCKER_HOST",
+          "value": "unix:///var/run/docker.sock"
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "docker-socket",
+          "containerPath": "/var/run/docker.sock",
+          "readOnly": false
+        }
+      ],
+      "volumesFrom": [],
+      "privileged": true,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/lldfyTasksFamily",
+          "mode": "non-blocking",
+          "awslogs-create-group": "true",
+          "max-buffer-size": "25m",
+          "awslogs-region": "us-west-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "systemControls": []
+    }
+  ],
+  "taskRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [
+    {
+      "name": "docker-socket",
+      "host": {
+        "sourcePath": "/var/run/docker.sock"
+      }
+    }
+  ],
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "cpu": "1024",
+  "memory": "3072",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  }
+}
