@@ -1,6 +1,8 @@
 # Import required library
 import psycopg2
 from typing import List, Tuple, Optional, Dict, Any
+from app.config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
+from sqlalchemy import create_engine, Column, Integer, String, BigInteger
 
 # Database connection parameters
 host = "lldfy-db.cxqsgsoe4cua.us-west-2.rds.amazonaws.com"
@@ -8,10 +10,15 @@ dbname = "lldfy_db"
 user = "admin_user"
 password = "Blockbuster123"
 port = "5432"
+host = DB_HOST
+dbname = DB_NAME
+user = DB_USER
+password = DB_PASSWORD
+port = DB_PORT
 
 # Establish the connection
 conn = psycopg2.connect(
-    dbname=dbname,
+    dbname="postgres",
     user=user,
     password=password,
     host=host,
@@ -108,3 +115,14 @@ def insert_problem_metadata(
         # Close the database connection
         if conn is not None:
             conn.close()
+
+def put_user(username: str, email: str, created_at: int):
+    try:
+        query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s);'
+        cursor.execute(query, (username, email, created_at))
+        conn.commit()
+    except Exception as e:
+        print("Error inserting user:", e)
+    finally:
+        cursor.close()
+        conn.close()

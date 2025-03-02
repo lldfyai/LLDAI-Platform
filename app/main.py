@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from routes import submission_handler
 import os
+from ariadne.asgi import GraphQL
+from app.graphql.schema import schema
 from config import UPLOAD_DIR 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -23,7 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
-
+graphql_app = GraphQL(schema, debug=True)
+app.add_route("/graphql", graphql_app)
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Code Execution Platform!"}
