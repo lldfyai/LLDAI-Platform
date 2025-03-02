@@ -1,6 +1,6 @@
 from ariadne import QueryType, MutationType
-from app.services import cognito_service, github_service
-from app.routes import db_connection
+from services import cognito_service, github_service
+from routes import db_connection
 
 query = QueryType()
 mutation = MutationType()

@@ -1,5 +1,5 @@
 import requests
-from app.config import GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+from config import GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 
 TOKEN_URL = "https://github.com/login/oauth/access_token"
 EMAIL_URL = "https://api.github.com/user/emails"

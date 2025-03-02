@@ -1,8 +1,7 @@
 # Import required library
 import psycopg2
 from typing import List, Tuple
-from app.config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
-from sqlalchemy import create_engine, Column, Integer, String, BigInteger
+from config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
 
 # Database connection parameters
 host = DB_HOST
