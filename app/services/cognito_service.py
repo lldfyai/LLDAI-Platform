@@ -3,9 +3,11 @@ import hashlib
 import base64
 import boto3
 
-from app.config import CLIENT_ID, CLIENT_SECRET, USER_POOL_ID
+from app.config import CLIENT_ID, CLIENT_SECRET, USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
-cognito = boto3.client("cognito-idp", region_name="us-west-2")
+cognito = boto3.client("cognito-idp", region_name="us-west-2",
+                       aws_access_key_id= AWS_ACCESS_KEY_ID,
+                       aws_secret_access_key= AWS_SECRET_ACCESS_KEY)
 def get_secret_hash_using_client_id(username, client_id):
     """Generate SECRET_HASH for Cognito authentication."""
     message = username + client_id

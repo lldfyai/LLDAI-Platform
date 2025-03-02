@@ -5,11 +5,6 @@ from app.config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
 from sqlalchemy import create_engine, Column, Integer, String, BigInteger
 
 # Database connection parameters
-host = "lldfy-db.cxqsgsoe4cua.us-west-2.rds.amazonaws.com"
-dbname = "lldfy_db"
-user = "admin_user"
-password = "Blockbuster123"
-port = "5432"
 host = DB_HOST
 dbname = DB_NAME
 user = DB_USER

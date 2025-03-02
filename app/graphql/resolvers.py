@@ -1,4 +1,3 @@
-import time
 from ariadne import QueryType, MutationType
 from app.services import cognito_service, github_service
 from app.routes import db_connection
@@ -35,7 +34,7 @@ def resolve_register(_, info, input):
         raise Exception(str(e))
 
     # Insert user into PostgreSQL asynchronously (simulated background processing)
-    db_connection.put_user(username, email, int(time.time()))
+    db_connection.put_user(username, email)
 
     return {
         "username": username,
