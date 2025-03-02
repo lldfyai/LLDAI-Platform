@@ -1,0 +1,60 @@
+type AuthResponse {
+    user: User!
+    token: String!
+    githubToken: String
+}
+
+type GithubUserDetails {
+    githubToken: String!
+    username: String!
+    email: String!
+}
+
+input GithubUsernameEmailInput {
+    githubCode: String!
+}
+
+input LoginInput {
+    githubToken: String
+    username: String
+    email: String
+    password: String!
+}
+
+input RegisterInput {
+    githubToken: String
+    username: String
+    email: String
+    password: String!
+}
+
+input ResetPasswordInput {
+    email: String!
+    confirmationCode: String!
+    newPassword: String!
+}
+
+type Submission {
+    id: ID!
+    user_id: ID!
+    problem_id: ID!
+    result: String!
+}
+
+type User {
+    username: String!
+    email: String!
+    problemsSolved: Int
+    rank: Int
+}
+
+type Mutation {
+    register(input: RegisterInput!): User
+    login(input: LoginInput!): AuthResponse
+    forgotPassword(email: String!): String!
+    resetPassword(input: ResetPasswordInput!): String!
+}
+
+type Query {
+    githubUsernameEmail(input: GithubUsernameEmailInput!): GithubUserDetails!
+}
