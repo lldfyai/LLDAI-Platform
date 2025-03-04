@@ -4,8 +4,9 @@ import os
 from ariadne.asgi import GraphQL
 from config import UPLOAD_DIR
 from fastapi.middleware.cors import CORSMiddleware
-
-
+from routes import create_problem
+from graphqlSchema.schema import schema
+from graphqlSchema.userSchema import userSchema
 
 app = FastAPI(
     title="LLDify Platform",
@@ -44,7 +45,7 @@ app.add_middleware(
 # Add our custom authentication middleware
 app.add_middleware(AuthMiddleware)
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
-app.include_router(create_problem_router, prefix="/api/v1", tags=["Problem Management"])
+app.include_router(create_problem.router, prefix="/api/v1", tags=["Problem Management"])
 graphql_app = GraphQL(schema, debug=True)
 app.add_route("/graphql", graphql_app)
 graphql_app = GraphQL(userSchema, debug=True)

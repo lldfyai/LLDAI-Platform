@@ -23,13 +23,18 @@ conn = psycopg2.connect(
 # Create a cursor object using the cursor() method
 cursor = conn.cursor()
 
-def fetch_problems_metadata() -> List[Tuple[int, str, str, list]]:
+def fetch_problems_metadata(user_id: int) -> List[Dict[str, Any]]:
     try:
-        # Prepare SQL query to fetch data from the problemMetadata table
-        query = query = 'SELECT "problemId", "problemTitle", difficulty, "Tags" FROM public."ProblemMetadata";'
+        # Prepare SQL query to fetch data from the ProblemMetadata table along with solvedStatus for the given user_id
+        query = '''
+        SELECT pm."problemId", pm."problemTitle", pm.difficulty, pm."Tags", uss."solvedStatus"
+        FROM public."ProblemMetadata" pm
+        LEFT JOIN public."UserSubmissionStats" uss 
+        ON pm."problemId" = uss."problemId" AND uss."userId" = %s;
+        '''
 
         # Execute the SQL command
-        cursor.execute(query)
+        cursor.execute(query, (user_id,))
 
         # Fetch all rows from the database
         data = cursor.fetchall()
@@ -41,7 +46,8 @@ def fetch_problems_metadata() -> List[Tuple[int, str, str, list]]:
                 "problemId": row[0],
                 "problemTitle": row[1],
                 "difficulty": row[2],
-                "Tags": row[3]
+                "Tags": row[3],
+                "solvedStatus": row[4] if row[4] is not None else 'UNATTEMPTED'  # Default to 'UNATTEMPTED' if `solvedStatus` is None
             }
             result.append(problem)
         return result
@@ -51,17 +57,19 @@ def fetch_problems_metadata() -> List[Tuple[int, str, str, list]]:
         return []
 
 
-def fetch_problem_metadata(problem_id: int) -> Optional[Dict[str, Any]]:
+
+def fetch_problem_metadata(user_id: int, problem_id: int) -> Optional[Dict[str, Any]]:
     try:
-        # Prepare SQL query to fetch data for a specific problemId
+        # Prepare SQL query to fetch data for a specific problemId for a specific userId
         query = '''
-        SELECT "problemId", "problemTitle", difficulty, "Tags", "description"
-        FROM public."ProblemMetadata"
-        WHERE "problemId" = %s;
+        SELECT pm."problemId", pm."problemTitle", pm.difficulty, pm."Tags", pm.description, uss."solvedStatus"
+        FROM public."ProblemMetadata" pm
+        LEFT JOIN public."UserSubmissionStats" uss ON pm."problemId" = uss."problemId" AND uss."userId" = %s
+        WHERE pm."problemId" = %s;
         '''
 
         # Execute the SQL command
-        cursor.execute(query, (problem_id,))
+        cursor.execute(query, (user_id, problem_id))
 
         # Fetch the row from the database
         row = cursor.fetchone()
@@ -73,11 +81,12 @@ def fetch_problem_metadata(problem_id: int) -> Optional[Dict[str, Any]]:
                 "problemTitle": row[1],
                 "difficulty": row[2],
                 "Tags": row[3],
-                "description": row[4]
+                "description": row[4],
+                "solvedStatus": row[5]
             }
             return problem_metadata
         else:
-            print(f"No data found for problemId: {problem_id}")
+            print(f"No data found for problemId: {problem_id} and userId: {user_id}")
             return None
 
     except Exception as e:
@@ -85,25 +94,38 @@ def fetch_problem_metadata(problem_id: int) -> Optional[Dict[str, Any]]:
         return None
 
 def insert_problem_metadata(
-        problemTitle: str,
+        problem_title: str,
         difficulty: str,
-        Tags: Optional[List[str]] = None,
-        timeLimit: Optional[float] = None,
-        memoryLimit: Optional[float] = None,
-        s3_path: Optional[str] = None,
-        description: Optional[str] = None
-):
+        tags: List[str],
+        time_limit: float,
+        memory_limit: float,
+        s3_path: str,
+        description: str
+) -> Optional[int]:
     try:
-        # Modify the query to include the problemId and use NULL on SQL side if it's not provided
-        query = '''
-        INSERT INTO public."ProblemMetadata" ("problemTitle", difficulty, "Tags", "timeLimit", "memoryLimit", s3_path, description)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-        '''
-        cursor.execute(query, (problemTitle, difficulty, Tags, timeLimit, memoryLimit, s3_path, description))
+        insert_query = """
+        INSERT INTO "ProblemMetadata" ("problemTitle", difficulty, "Tags", "timeLimit", 
+                                       "memoryLimit", s3_path, description)
+        VALUES (%s, %s, %s::tag[], %s, %s, %s, %s)
+        RETURNING "problemId";
+        """
+
+        # Execute the query with the provided parameters
+        cursor.execute(insert_query, (problem_title, difficulty, tags, time_limit,
+                                      memory_limit, s3_path, description))
+
+        # Fetch the returned problem ID
+        problem_id = cursor.fetchone()[0]
+
+        # Commit the transaction
         conn.commit()
+
+        # Return the problem ID
+        return problem_id
     except Exception as e:
         conn.rollback()
         raise e
+
 
 def put_user(username: str, email: str, created_at: int):
     try:

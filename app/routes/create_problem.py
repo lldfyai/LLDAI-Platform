@@ -5,27 +5,25 @@ from app.routes.db_connection import insert_problem_metadata
 
 router = APIRouter()
 
-# Define a Pydantic model that corresponds to your data input
 class Problem(BaseModel):
     problemTitle: str
     difficulty: str
-    problemId: Optional[int] = None
-    Tags: Optional[List[str]] = None
-    timeLimit: Optional[float] = None
-    memoryLimit: Optional[float] = None
-    s3_path: Optional[str] = None
-    description: Optional[str] = None
+    Tags: List[str]
+    timeLimit: float
+    memoryLimit: float
+    s3_path: str
+    description: str
 
-# Create an API endpoint to insert new problem metadata into the database
 @router.post("/create_problem/")
 async def create_problem(problem: Problem):
     try:
+        print(problem)
         insert_problem_metadata(
-            problemTitle=problem.problemTitle,
+            problem_title=problem.problemTitle,
             difficulty=problem.difficulty,
-            Tags=problem.Tags,
-            timeLimit=problem.timeLimit,
-            memoryLimit=problem.memoryLimit,
+            tags=problem.Tags,
+            time_limit=problem.timeLimit,
+            memory_limit=problem.memoryLimit,
             s3_path=problem.s3_path,
             description=problem.description
         )
