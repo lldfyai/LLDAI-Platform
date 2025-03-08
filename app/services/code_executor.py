@@ -1,4 +1,3 @@
-import docker
 import os
 from config import LANGUAGE_CONFIG, UPLOAD_DIR
 import docker

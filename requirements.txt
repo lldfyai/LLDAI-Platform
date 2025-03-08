@@ -1,3 +1,12 @@
 fastapi
 uvicorn
 docker
+python-multipart
+PyJWT>=2.8.0
+python-dateutil>=2.8.2
+cryptography>=3.4.7
+requests
+SQLAlchemy==1.4.46
+psycopg2>=2.9.9
+boto3
+ariadne==0.19.0

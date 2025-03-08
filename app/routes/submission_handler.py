@@ -4,7 +4,6 @@ import json
 import asyncio
 from fastapi.responses import JSONResponse
 import os
-import shutil
 import uuid
 from config import UPLOAD_DIR
 from services.code_executor import CodeExecutor

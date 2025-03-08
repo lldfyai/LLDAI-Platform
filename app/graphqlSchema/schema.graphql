@@ -1,0 +1,13 @@
+type Query {
+    problems(userId: Int!): [Problem]
+    problem(userId: Int!, problemId: Int!): Problem
+}
+
+type Problem {
+    problemId: Int
+    problemTitle: String
+    difficulty: String
+    Tags: [String]
+    description: String
+    solvedStatus: String
+}
