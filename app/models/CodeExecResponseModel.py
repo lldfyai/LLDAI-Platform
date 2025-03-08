@@ -36,3 +36,24 @@ class CodeExecResponseModel:
             "error_msg": self.error_msg,
             "evaluation_state": self.evaluation_state
         }
+
+    @classmethod
+    def populate_response_model(cls, status_code, lang, run_success, exec_runtime, memory, problem_id, finished, total_correct, total_testcases, submission_id, status_msg, evaluation_state, failed_testcase=None, expected_output=None, actual_output=None, error_msg=None):
+        return cls(
+            status_code=status_code,
+            lang=lang,
+            run_success=run_success,
+            exec_runtime=exec_runtime,
+            memory=memory,
+            problem_id=problem_id,
+            finished=finished,
+            total_correct=total_correct,
+            total_testcases=total_testcases,
+            submission_id=submission_id,
+            status_msg=status_msg,
+            evaluation_state=evaluation_state,
+            failed_testcase=failed_testcase,
+            expected_output=expected_output,
+            actual_output=actual_output,
+            error_msg=error_msg
+        ).to_dict()

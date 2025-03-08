@@ -45,7 +45,7 @@ class SubmissionHandler:
 
         await asyncio.sleep(25)  # Simulate processing delay
 
-        result = self.executor.execute_code_in_docker(submission_id, language, submission_folder)
+        result = self.executor.execute_code_in_docker(submission_id, problem_id, language, submission_folder)
 
         self.submission_store[submission_id]["state"] = SubmissionState.COMPLETED.value
         self.submission_store[submission_id]["result"] = result
