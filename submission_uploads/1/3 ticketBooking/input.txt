@@ -1,0 +1,160 @@
+2
+CityA
+CityB
+2
+1 PVR CityA
+2 Inox CityB
+2
+1 1 5
+Silver Gold Platinum Silver Gold
+2 2 4
+Gold Platinum Gold Platinum
+2
+1 Avengers
+2 Inception
+2
+1 1 1 18:00 250.0
+2 2 2 20:00 300.0
+2
+1 Alice
+2 Bob
+3
+FIND_SHOWS CityA
+SHOW_SEATS 1
+FIND_SHOWS CityB Inception
+
+1
+CityX
+1
+1 Cineplex CityX
+1
+1 1 3
+Silver Gold Platinum
+1
+1 Interstellar
+1
+1 1 1 18:00 300.0
+2
+1 Charlie
+2 Dave
+3
+SHOW_SEATS 1
+BOOK_SEATS 1 1 2 2 3
+BOOK_SEATS 2 1 1 2
+
+1
+CityZ
+1
+1 IMAX CityZ
+1
+1 1 4
+Platinum Platinum Gold Silver
+1
+1 Titanic
+1
+1 1 1 20:00 250.0
+3
+1 Eve
+2 Frank
+3 Grace
+4
+FIND_SHOWS CityZ Titanic
+SHOW_SEATS 1
+BOOK_SEATS 1 1 2 1 3
+BOOK_SEATS 2 1 2 3 4
+
+1
+CityM
+1
+1 Regal CityM
+1
+1 1 3
+Gold Silver Platinum
+1
+1 Matrix
+1
+1 1 1 19:00 200.0
+1
+1 John
+2
+FIND_SHOWS CityN
+FIND_SHOWS CityM NonExistentMovie
+
+1
+CityP
+1
+1 AMC CityP
+1
+1 1 5
+Silver Silver Gold Gold Platinum
+1
+1 Incredibles
+1
+1 1 1 17:00 150.0
+2
+1 Mike
+2 Anna
+3
+BOOK_SEATS 1 1 2 1 2
+BOOK_SEATS 2 1 2 2 3
+SHOW_SEATS 1
+
+1
+CityQ
+2
+1 Regal CityQ
+2 CineCity CityQ
+2
+1 1 4
+Gold Gold Silver Silver
+2 2 3
+Platinum Platinum Gold
+2
+1 Spiderman
+2 Batman
+3
+1 1 1 1 15:00 180.0
+2 2 1 1 16:00 200.0
+3 2 2 2 17:00 220.0
+1
+1 Peter
+3
+FIND_SHOWS CityQ
+FIND_SHOWS CityQ Batman
+FIND_SHOWS CityQ Spiderman
+
+1
+CityR
+1
+1 Odeon CityR
+1
+1 1 6
+Silver Gold Platinum Silver Gold Platinum
+1
+1 Interstellar
+1
+1 1 1 21:00 350.0
+1
+1 Neil
+1
+SHOW_SEATS 1
+
+1
+CityS
+1
+1 Regal CityS
+1
+1 1 4
+Gold Gold Platinum Silver
+1
+1 Joker
+1
+1 1 1 19:30 400.0
+2
+1 Bruce
+2 Clark
+4
+BOOK_SEATS 1 1 1 2
+BOOK_SEATS 2 1 2 1 4
+BOOK_SEATS 1 1 1 3
+BOOK_SEATS 2 1 1 2
