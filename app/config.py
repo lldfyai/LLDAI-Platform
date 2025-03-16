@@ -1,3 +1,4 @@
+import os
 
 UPLOAD_DIR = "submission_uploads"
 LANGUAGE_CONFIG = {
