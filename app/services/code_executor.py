@@ -4,6 +4,12 @@ import docker
 from io import BytesIO
 import tarfile
 from models.CodeExecResponseModel import CodeExecResponseModel
+from models.ErrorResponseModel import ErrorResponseModel, ErrorType, Errors
+from enum import Enum
+
+class StateEnum(Enum):
+    COMPLETED = "Completed"
+    FAILURE = "Failure"
 
 class CodeExecutor:
     def __init__(self):
@@ -34,7 +40,7 @@ class CodeExecutor:
         os.makedirs(output_folder, exist_ok=True)
         image_name, error = self.build_docker_image(language, submission_folder)
         if not image_name:
-            return {"status": "Error", "output": error}
+            return {"state": StateEnum.FAILURE.value, "output": ErrorResponseModel.populate_response_model(ErrorType.SYSTEM_ERROR, str(error))}
         try:
             # Run the container with the user-submitted code files
             container = self.client.containers.run(
@@ -45,21 +51,33 @@ class CodeExecutor:
                 stderr=True
             )
             container.wait()  # Wait for the container to finish
-            
+
+            #Copy compile log from the container to the host
+            file_name = "compile.log"
+            src_path = f"/app/output/{file_name}"
+            dest_path = os.path.join(output_folder, file_name)
+            self.copy_file_from_container(container.id, src_path, dest_path)
+            if os.path.exists(dest_path):
+                with open(dest_path, "r") as file:
+                    error_msg = file.read()
+                return {"state": StateEnum.FAILURE.value, "output": ErrorResponseModel.populate_response_model(Errors.COMPILATION_ERROR.status_code, error_msg, Errors.COMPILATION_ERROR.error_type)}
+
+
             # Copy generated files from the container to the host
             generated_files = ["results.properties", "stdout.txt", "stderr.txt"]
             for file_name in generated_files:
                 src_path = f"/app/output/{file_name}"
                 dest_path = os.path.join(output_folder, file_name)
                 self.copy_file_from_container(container.id, src_path, dest_path)
+
             
             container.remove()  # Remove the container after copying files
             response = self.generate_response_model(submission_id, problem_id, language, output_folder)
-            return {"status": "Success", "output": response}
+            return {"state": StateEnum.COMPLETED.value, "output": response}
         except docker.errors.ContainerError as e:
-            return {"status": "Execution Failed", "output": str(e.stderr.decode())}
+            return {"state": StateEnum.FAILURE.value, "output": ErrorResponseModel.populate_response_model(Errors.SYSTEM_ERROR.status_code, str(e.stderr.decode()), Errors.SYSTEM_ERROR.error_type)}
         except Exception as e:
-            return {"status": "Error", "output": str(e)}
+            return {"state": StateEnum.FAILURE.value, "output": ErrorResponseModel.populate_response_model(Errors.SYSTEM_ERROR.status_code, str(e), Errors.SYSTEM_ERROR.error_type)}
 
     def copy_file_from_container(self, container_id, src_path, dest_path):
         container = self.client.containers.get(container_id)

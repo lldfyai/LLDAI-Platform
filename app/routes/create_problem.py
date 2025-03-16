@@ -1,7 +1,7 @@
 from fastapi import APIRouter,FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from app.routes.db_connection import insert_problem_metadata
+from routes.db_connection import insert_problem_metadata
 
 router = APIRouter()
 
