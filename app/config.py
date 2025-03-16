@@ -17,3 +17,4 @@ DB_HOST = os.getenv("DB_HOST")
 USER_POOL_ID = os.getenv("USER_POOL_ID")
 CLIENT_ID = os.getenv("COGNITO_CLIENT_ID")
 CLIENT_SECRET = os.getenv("COGNITO_CLIENT_SECRET")
+DB_PORT = "5432"
