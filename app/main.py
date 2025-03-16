@@ -7,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import create_problem
 from graphqlSchema.schema import schema
 from graphqlSchema.userSchema import userSchema
+from fastapi import Request, HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+from services.cognito_service import verify_auth_token
 
 app = FastAPI(
     title="LLDify Platform",
@@ -43,7 +46,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 # Add our custom authentication middleware
-app.add_middleware(AuthMiddleware)
+#app.add_middleware(AuthMiddleware)
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
 app.include_router(create_problem.router, prefix="/api/v1", tags=["Problem Management"])
 graphql_app = GraphQL(schema, debug=True)
