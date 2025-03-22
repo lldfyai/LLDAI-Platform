@@ -29,6 +29,7 @@ env:
   USER_POOL_ID: ${{ secrets.USER_POOL_ID}}
   COGNITO_CLIENT_ID: ${{ secrets.CLIENT_ID}}
   COGNITO_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET}}
+  SQLALCHEMY_DB_HOST: ${{ secrets.SQLALCHEMY_DB_HOST}}
 jobs:
   pr-build:
     name: PR Build Check
