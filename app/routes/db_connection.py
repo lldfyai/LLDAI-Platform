@@ -1,4 +1,4 @@
-# to be fixed
+# to be fixed in upcoming PRs
 # # Import required library
 # import psycopg2
 # from typing import List, Tuple, Optional, Dict, Any
