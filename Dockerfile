@@ -26,6 +26,10 @@ COPY ./app /app
 ENV PATH=/root/.local/bin:$PATH
 ENV PYTHONPATH=/app
 
+# Make the start.sh script executable
+RUN chmod +x /app/start.sh
+
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use the start.sh script as the entry point
+CMD ["/app/start.sh"]
