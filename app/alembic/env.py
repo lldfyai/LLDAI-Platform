@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 from models.db.tables import Base
-
+from config import SQLALCHEMY_DB_HOST
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -26,7 +26,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-database_url = os.getenv("DATABASE_URL")
+database_url = SQLALCHEMY_DB_HOST
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
 
