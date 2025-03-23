@@ -48,7 +48,7 @@ app.add_middleware(
 # Add our custom authentication middleware
 #app.add_middleware(AuthMiddleware)
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
-#app.include_router(create_problem.router, prefix="/api/v1", tags=["Problem Management"])
+app.include_router(create_problem.router, prefix="/api/v1", tags=["Problem Management"])
 graphql_app = GraphQL(schema, debug=True)
 app.add_route("/graphql", graphql_app)
 graphql_app = GraphQL(userSchema, debug=True)
