@@ -1,18 +1,48 @@
 import os
+import boto3
+import json
+from botocore.exceptions import ClientError
+
+
+def get_secret():
+    secret_name = "lldfySecrets"
+    region_name = "us-west-2"
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        raise e
+
+    secret_string = get_secret_value_response['SecretString']
+    return json.loads(secret_string)
+
+# Retrieve the secret once and parse it into a dictionary
+secret = get_secret()
 
 UPLOAD_DIR = "submission_uploads"
 LANGUAGE_CONFIG = {
     "java": {"dockerfile": "Dockerfile.java", "image": "java_executor"},
     "python": {"dockerfile": "Dockerfile.python", "image": "python_executor"},
 }
-AWS_ACCOUNT_ID = os.getenv("AWS_ACCOUNT_ID")
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-GITHUB_CLIENT_SECRET = os.getenv("OAUTH2_CLIENT_SECRET")
-GITHUB_CLIENT_ID = os.getenv("OAUTH2_CLIENT_ID")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-USER_POOL_ID = os.getenv("USER_POOL_ID")
-CLIENT_ID = os.getenv("COGNITO_CLIENT_ID")
-CLIENT_SECRET = os.getenv("COGNITO_CLIENT_SECRET")
-DB_PORT = "5432"
-SQLALCHEMY_DB_HOST = os.getenv("SQLALCHEMY_DB_HOST")
+
+# Replace os.getenv with values from the secret
+AWS_SECRET_ACCESS_KEY = secret["AWS_SECRET_ACCESS_KEY"]
+GITHUB_CLIENT_SECRET = secret["OAUTH2_CLIENT_SECRET"]
+GITHUB_CLIENT_ID = secret["OAUTH2_CLIENT_ID"]
+DB_PASSWORD = secret["DB_PASSWORD"]
+USER_POOL_ID = secret["USER_POOL_ID"]
+CLIENT_ID = secret["COGNITO_CLIENT_ID"]
+CLIENT_SECRET = secret["COGNITO_CLIENT_SECRET"]
+SQLALCHEMY_DB_HOST = secret["SQLALCHEMY_DB_HOST"]
