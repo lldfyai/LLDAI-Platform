@@ -15,10 +15,62 @@
         }
       ],
       "essential": true,
-      "environment": [
+       "environment": [
         {
           "name": "DOCKER_HOST",
           "value": "unix:///var/run/docker.sock"
+        },
+        {
+          "name": "AWS_ACCOUNT_ID",
+          "value": "${AWS_ACCOUNT_ID}"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "value": "${AWS_ACCESS_KEY_ID}"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "value": "${AWS_SECRET_ACCESS_KEY}"
+        },
+        {
+          "name": "OAUTH2_CLIENT_SECRET",
+          "value": "${OAUTH2_CLIENT_SECRET}"
+        },
+        {
+          "name": "OAUTH2_CLIENT_ID",
+          "value": "${OAUTH2_CLIENT_ID}"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "value": "${DB_PASSWORD}"
+        },
+        {
+          "name": "DB_USER",
+          "value": "${DB_USER}"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "${DB_NAME}"
+        },
+        {
+          "name": "DB_HOST",
+          "value": "${DB_HOST}"
+        },
+        {
+          "name": "USER_POOL_ID",
+          "value": "${USER_POOL_ID}"
+        },
+        {
+          "name": "COGNITO_CLIENT_ID",
+          "value": "${CLIENT_ID}"
+        },
+        {
+          "name": "COGNITO_CLIENT_SECRET",
+          "value": "${CLIENT_SECRET}"
+        },
+        {
+          "name": "SQLALCHEMY_DB_HOST",
+          "value": "${SQLALCHEMY_DB_HOST}"
         }
       ],
       "mountPoints": [

@@ -89,6 +89,20 @@ jobs:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ secrets.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+          environment-variables: |
+            AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_KEY }}
+            OAUTH2_CLIENT_SECRET=${{ secrets.OAUTH2_CLIENT_SECRET }}
+            OAUTH2_CLIENT_ID=${{ secrets.OAUTH2_CLIENT_ID }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            USER_POOL_ID=${{ secrets.USER_POOL_ID }}
+            COGNITO_CLIENT_ID=${{ secrets.CLIENT_ID }}
+            COGNITO_CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+            SQLALCHEMY_DB_HOST=${{ secrets.SQLALCHEMY_DB_HOST }}
 
       - name: Deploy to ECS Service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
