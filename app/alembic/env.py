@@ -27,6 +27,7 @@ target_metadata = Base.metadata
 # ... etc.
 
 database_url = SQLALCHEMY_DB_HOST
+print(f"SQL alchemy database URL: {database_url}")
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
 
