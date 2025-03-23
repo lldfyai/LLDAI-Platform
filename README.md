@@ -1,2 +1,2 @@
-# LLDAI-Platform
+# LLDAI-Platform project
 Document : 
