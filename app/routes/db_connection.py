@@ -15,10 +15,10 @@ port = DB_PORT
 # Establish the connection
 conn = psycopg2.connect(
     dbname="lldfy_db",
-    user=user,
+    user="admin_user",
     password=password,
-    host=host,
-    port=port
+    host="lldfy-db.cxqsgsoe4cua.us-west-2.rds.amazonaws.com",
+    port="5432"
 )
 
 # Create a cursor object using the cursor() method
