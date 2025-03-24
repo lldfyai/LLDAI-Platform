@@ -62,11 +62,11 @@
         },
         {
           "name": "COGNITO_CLIENT_ID",
-          "value": "${CLIENT_ID}"
+          "value": "${COGNITO_CLIENT_ID}"
         },
         {
           "name": "COGNITO_CLIENT_SECRET",
-          "value": "${CLIENT_SECRET}"
+          "value": "${COGNITO_CLIENT_SECRET}"
         },
         {
           "name": "SQLALCHEMY_DB_HOST",
