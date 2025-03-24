@@ -23,7 +23,7 @@ conn = psycopg2.connect(
 
 # Create a cursor object using the cursor() method
 cursor = conn.cursor()
-
+print(f"SQL connection established with host: {host}")
 def fetch_problems_metadata(user_id: int) -> List[Dict[str, Any]]:
     try:
         # Prepare SQL query to fetch data from the ProblemMetadata table along with solvedStatus for the given user_id

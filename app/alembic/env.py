@@ -30,6 +30,7 @@ database_url = SQLALCHEMY_DB_HOST
 print(f"SQL alchemy database URL: {database_url}")
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
+    print(f"SQL alchemy database URL set")
 
 
 def run_migrations_offline() -> None:
