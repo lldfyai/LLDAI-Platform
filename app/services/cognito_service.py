@@ -6,9 +6,9 @@ import requests
 import jwt
 from jwt import PyJWKClient
 from fastapi import HTTPException
-from config import CLIENT_ID, CLIENT_SECRET, USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from config import COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 COGNITO_REGION= "us-west-2"
-print(CLIENT_ID, CLIENT_SECRET, USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+print(COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
 # Initialize the Cognito client
 cognito = boto3.client("cognito-idp", region_name=COGNITO_REGION,
                        aws_access_key_id= AWS_ACCESS_KEY_ID,
@@ -51,7 +51,7 @@ def verify_auth_token(auth_token: str) -> dict:
             auth_token,
             signing_key.key,
             algorithms=["RS256"],
-            audience=CLIENT_ID,  # Should match your app client ID
+            audience=COGNITO_CLIENT_ID,  # Should match your app client ID
             issuer=issuer,
             options={"require_exp": True, "require_iat": True}
         )
@@ -79,22 +79,22 @@ def verify_auth_token(auth_token: str) -> dict:
 def get_secret_hash_using_client_id(username, client_id):
     """Generate SECRET_HASH for Cognito authentication."""
     message = username + client_id
-    dig = hmac.new(CLIENT_SECRET.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).digest()
+    dig = hmac.new(COGNITO_CLIENT_SECRET.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).digest()
     return base64.b64encode(dig).decode()
 def get_secret_hash(username: str) -> str:
     """Compute Cognito secret hash for authentication."""
-    msg = username + CLIENT_ID
-    dig = hmac.new(CLIENT_SECRET.encode('utf-8'), msg.encode('utf-8'), hashlib.sha256).digest()
+    msg = username + COGNITO_CLIENT_ID
+    dig = hmac.new(COGNITO_CLIENT_SECRET.encode('utf-8'), msg.encode('utf-8'), hashlib.sha256).digest()
     return base64.b64encode(dig).decode()
 def get_login_token(email: str, username: str, password: str) -> str:
     try:
         auth_params = {
             "USERNAME": username if username else email,
             "PASSWORD": password,
-            "SECRET_HASH": get_secret_hash_using_client_id(username, CLIENT_ID)
+            "SECRET_HASH": get_secret_hash_using_client_id(username, COGNITO_CLIENT_ID)
         }
         auth_response = cognito.initiate_auth(
-            ClientId=CLIENT_ID,
+            ClientId=COGNITO_CLIENT_ID,
             AuthFlow="USER_PASSWORD_AUTH",
             AuthParameters=auth_params
         )
@@ -141,7 +141,7 @@ def register_cognito_user(username: str, email: str, password: str):
 def forgot_password(email: str):
     try:
         return cognito.forgot_password(
-            ClientId=CLIENT_ID,
+            ClientId=COGNITO_CLIENT_ID,
             Username=email,
             SecretHash=get_secret_hash(email)
         )
@@ -151,7 +151,7 @@ def forgot_password(email: str):
 def reset_password(email, confirmation_code, new_password):
     try:
         return cognito.confirm_forgot_password(
-            ClientId=CLIENT_ID,
+            ClientId=COGNITO_CLIENT_ID,
             Username=email,
             ConfirmationCode=confirmation_code,
             Password=new_password,
