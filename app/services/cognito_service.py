@@ -15,12 +15,6 @@ cognito = boto3.client("cognito-idp", region_name=COGNITO_REGION,
                        aws_secret_access_key= AWS_SECRET_ACCESS_KEY)
 COGNITO_KEYS_URL = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json"
 
-# Download the JWKS once. In production, you might cache/refresh these keys periodically.
-def fetch_jwks():
-    response = cognito.get_open_id_configuration(UserPoolId=USER_POOL_ID)
-    return response["jwks_uri"]
-
-jwks = fetch_jwks()
 def verify_auth_token(auth_token: str) -> dict:
     """
     Verify a Cognito JWT token using the JWKS via PyJWKClient.
