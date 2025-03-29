@@ -1,0 +1,14 @@
+type Query {
+    problems(userId: Int!): [Problem]
+    problem(problemId: Int!): Problem
+}
+
+type Problem {
+    problem_id: Int
+    problem_title: String
+    difficulty: String
+    tags: [String]
+    time_limit: Float
+    memory_limit: Float
+    s3_path: String
+}

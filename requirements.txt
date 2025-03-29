@@ -11,3 +11,4 @@ psycopg2>=2.9.9
 boto3
 ariadne==0.19.0
 alembic
+graphene

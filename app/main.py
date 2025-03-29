@@ -4,9 +4,7 @@ import os
 from ariadne.asgi import GraphQL
 from config import UPLOAD_DIR
 from fastapi.middleware.cors import CORSMiddleware
-from routes import create_problem
-from graphqlSchema.schema import schema
-from graphqlSchema.userSchema import userSchema
+from graphqls.resolvers.problem_resolver import problemSchema
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from services.cognito_service import verify_auth_token
@@ -48,11 +46,9 @@ app.add_middleware(
 # Add our custom authentication middleware
 #app.add_middleware(AuthMiddleware)
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
-app.include_router(create_problem.router, prefix="/api/v1", tags=["Problem Management"])
-graphql_app = GraphQL(schema, debug=True)
+graphql_app = GraphQL(problemSchema, debug=True)
 app.add_route("/graphql", graphql_app)
-graphql_app = GraphQL(userSchema, debug=True)
-app.add_route("/auth", graphql_app)
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Code Execution Platform!"}
