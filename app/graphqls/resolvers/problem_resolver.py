@@ -1,13 +1,10 @@
-from graphene import ObjectType, Field, Int
-import graphene
-from graphqls.models import ProblemMetadata
 from services.problems_manager import ProblemManager
 from ariadne import QueryType, make_executable_schema, load_schema_from_path
 
 type_defs = load_schema_from_path("graphqls/schema/schema.graphql")
 
 query = QueryType()
-problems_manager = ProblemManager(None)
+problems_manager = ProblemManager()
 
 
 @query.field("problem")

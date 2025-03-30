@@ -1,19 +1,22 @@
 from models.bl.problem import ProblemMetadata
 from client.s3_client import generate_presigned_url
+from config import PROBLEM_S3_BUCKET
+from dao.problem_dao import ProblemDAO
 
 class ProblemManager:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self):
+        self.db = ProblemDAO()   
 
     def get_problems(self):
         problems = self.db.get_problems()
         return problems
 
     def get_problem(self, problem_id):
-        # Mocking the problem
-        # ToDo: Implement the actual logic to fetch the problem from the database
-        s3_path = generate_presigned_url("lldfy-problem-store", f"{problem_id}/description.md")
-        problem = ProblemMetadata("1", "Two Sum", "Easy", ["Array", "Hash Table"], 1, 1, s3_path)
+        problem_metadata = self.db.get_problem_by_id(problem_id)
+        if problem_metadata is None:
+            return None # Problem not found             
+        s3_path = generate_presigned_url(PROBLEM_S3_BUCKET, f"{problem_id}/description.md")
+        problem = ProblemMetadata(problem_metadata.problemId, problem_metadata.problemTitle, problem_metadata.difficulty, problem_metadata.tags, problem_metadata.timeLimit, problem_metadata.memoryLimit, s3_path)
         return problem
 
     def create_problem(self, problem):
