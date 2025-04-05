@@ -128,13 +128,25 @@ def insert_problem_metadata(
         raise e
 
 
-def put_user(username: str, email: str, created_at: int):
+def put_user(username: str, email: str):
     try:
-        query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s) RETURNING "userId";'
-        cursor.execute(query, (username, email, created_at))
-        # Fetch the generated userId
-        user_id = cursor.fetchone()[0]
+        query = 'INSERT INTO public."UserMetadata" (username, email) VALUES (%s, %s);'
+        cursor.execute(query, (username, email))
+        query2 = '''
+        SELECT "userId", username, email, "problemsSolved", rank
+        FROM public."UserMetadata"
+        WHERE username = %s OR email = %s;
+        '''
         conn.commit()
+        # Execute the query with the provided parameters
+        cursor.execute(query2, (username, email))
+        # Fetch the user details
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            print(f"No user found with username: {username} or email: {email}")
+            return None
     except Exception as e:
         print("Error inserting user:", e)
         return user_id

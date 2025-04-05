@@ -34,7 +34,7 @@ def resolve_register(_, info, input):
         raise Exception(str(e))
     created_at = int(datetime.utcnow().timestamp()) 
     # Insert user into PostgreSQL asynchronously (simulated background processing)
-    userId = db_connection.put_user(username, email, created_at)
+    userId = db_connection.put_user(username, email)
 
     return {
         "username": username,
