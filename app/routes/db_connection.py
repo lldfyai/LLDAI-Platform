@@ -130,7 +130,7 @@ def insert_problem_metadata(
 
 def put_user(username: str, email: str, created_at: int):
     try:
-        query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s);'
+        query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s) RETURNING "userId";'
         cursor.execute(query, (username, email, created_at))
         # Fetch the generated userId
         user_id = cursor.fetchone()[0]
@@ -141,3 +141,36 @@ def put_user(username: str, email: str, created_at: int):
     finally:
         cursor.close()
         conn.close()
+
+def get_user_from_username_or_email(username: Optional[str], email: Optional[str]) -> Optional[Dict[str, Any]]:
+    try:
+        # Prepare the SQL query to fetch user details based on username or email
+        query = '''
+        SELECT "userId", username, email, "problemsSolved", rank
+        FROM public."UserMetadata"
+        WHERE username = %s OR email = %s;
+        '''
+
+        # Execute the query with the provided parameters
+        cursor.execute(query, (username, email))
+
+        # Fetch the user details
+        row = cursor.fetchone()
+
+        # If a user is found, return their details as a dictionary
+        if row:
+            user_details = {
+                "userId": row[0],
+                "username": row[1],
+                "email": row[2],
+                "problemsSolved": row[3],
+                "rank": row[4]
+            }
+            return user_details
+        else:
+            print(f"No user found with username: {username} or email: {email}")
+            return None
+
+    except Exception as e:
+        print("Error fetching user:", e)
+        return None

@@ -55,12 +55,16 @@ def resolve_login(_, info, input):
         username = input.get("username")
         email = input.get("email")
         token = None
+    user_details = db_connection.get_user_from_username_or_email(username, email)
+    if not user_details:
+        raise Exception("User not found")
     return {
         "user": {
             "username": username,
             "email": email,
-            "problemsSolved": 0,
-            "rank": 0
+            "problemsSolved": user_details["problemsSolved"],
+            "rank": user_details["rank"],
+            "userId": user_details["userId"]
         },
         "token": cognito_service.get_login_token(email, username, password),
         "githubToken": token
