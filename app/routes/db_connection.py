@@ -132,10 +132,12 @@ def put_user(username: str, email: str, created_at: int):
     try:
         query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s);'
         cursor.execute(query, (username, email, created_at))
+        # Fetch the generated userId
+        user_id = cursor.fetchone()[0]
         conn.commit()
     except Exception as e:
         print("Error inserting user:", e)
-
+        return user_id
     finally:
         cursor.close()
         conn.close()

@@ -46,6 +46,7 @@ type User {
     email: String!
     problemsSolved: Int
     rank: Int
+    userId: Int!
 }
 
 type Mutation {

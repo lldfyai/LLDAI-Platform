@@ -1,7 +1,7 @@
 from ariadne import QueryType, MutationType
 from services import cognito_service, github_service
 from routes import db_connection
-
+from datetime import datetime
 query = QueryType()
 mutation = MutationType()
 
@@ -32,15 +32,16 @@ def resolve_register(_, info, input):
         cognito_service.register_cognito_user(username, email, password)
     except Exception as e:
         raise Exception(str(e))
-
+    created_at = int(datetime.utcnow().timestamp()) 
     # Insert user into PostgreSQL asynchronously (simulated background processing)
-    db_connection.put_user(username, email)
+    userId = db_connection.put_user(username, email, created_at)
 
     return {
         "username": username,
         "email": email,
         "problemsSolved": 0,
-        "rank": 0
+        "rank": 0,
+        "userId": userId
     }
 
 @mutation.field("login")
