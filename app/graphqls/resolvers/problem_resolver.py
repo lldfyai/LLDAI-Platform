@@ -1,6 +1,6 @@
 from services.problems_manager import ProblemManager
 from ariadne import QueryType, make_executable_schema, load_schema_from_path
-
+from routes import db_connection
 type_defs = load_schema_from_path("graphqls/schema/schema.graphql")
 
 query = QueryType()
@@ -14,5 +14,10 @@ def resolve_problem(_, info, problemId):
     if problem_metadata is None:
         raise Exception(f"Problem with ID {problemId} not found.")
     return problem_metadata.to_dict()
+
+@query.field("problems")
+def resolve_problems(_, info, userId):
+    problems_metadata = db_connection.fetch_problems_metadata(userId)
+    return problems_metadata
 
 problemSchema = make_executable_schema(type_defs, query)
