@@ -130,7 +130,7 @@ def insert_problem_metadata(
 
 def put_user(username: str, email: str, created_at: int):
     try:
-        query = 'INSERT INTO public."UserMetadata" (userName, email, created_at) VALUES (%s, %s, %s) RETURNING "userId";'
+        query = 'INSERT INTO public."UserMetadata" (username, email, created_at) VALUES (%s, %s, %s) RETURNING "userId";'
         cursor.execute(query, (username, email, created_at))
         # Fetch the generated userId
         user_id = cursor.fetchone()[0]
@@ -148,7 +148,7 @@ def get_user_from_username_or_email(username: Optional[str], email: Optional[str
         query = '''
         SELECT "userId", username, email, "problemsSolved", rank
         FROM public."UserMetadata"
-        WHERE userName = %s OR email = %s;
+        WHERE username = %s OR email = %s;
         '''
 
         # Execute the query with the provided parameters
