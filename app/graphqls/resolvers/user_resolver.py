@@ -2,7 +2,8 @@ from ariadne import QueryType, MutationType
 from services import cognito_service, github_service
 from services.user_manager import UserManager
 from datetime import datetime
-
+import os
+from ariadne import make_executable_schema, load_schema_from_path
 query = QueryType()
 mutation = MutationType()
 
@@ -96,3 +97,6 @@ def resolve_reset_password(_, info, input):
         return str(e)
 
 resolvers = [query, mutation]
+schema_path = os.path.join(os.path.dirname(__file__), "schema/userSchema.graphql")
+type_defs = load_schema_from_path(schema_path)
+userSchema = make_executable_schema(type_defs, resolvers)
