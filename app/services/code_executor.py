@@ -59,8 +59,10 @@ class CodeExecutor:
             self.copy_file_from_container(container.id, src_path, dest_path)
             if os.path.exists(dest_path):
                 with open(dest_path, "r") as file:
-                    error_msg = file.read()
-                return {"state": StateEnum.FAILURE.value, "output": ErrorResponseModel.populate_response_model(Errors.COMPILATION_ERROR.status_code, error_msg, Errors.COMPILATION_ERROR.error_type)}
+                    error_msg = file.read().strip()
+                if error_msg:
+                    # Compilation error occurred
+                    return {"state": StateEnum.FAILURE.value, "output": ErrorResponseModel.populate_response_model(Errors.COMPILATION_ERROR.status_code, error_msg, Errors.COMPILATION_ERROR.error_type)}    
 
 
             # Copy generated files from the container to the host

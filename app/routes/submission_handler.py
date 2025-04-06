@@ -9,6 +9,9 @@ from config import UPLOAD_DIR
 from services.code_executor import CodeExecutor
 from enum import Enum
 from pydantic import BaseModel
+from config import SUBMISSION_S3_BUCKET
+import shutil
+from client.s3_client import upload_file
 
 
 router = APIRouter()
@@ -34,6 +37,40 @@ class SubmissionHandler:
             file_paths.append(file_path)
         return file_paths
 
+    async def copy_to_s3_and_cleanup(self, user_id, problem_id, submission_id, submission_folder):
+        """
+        Copies all files in the submission folder to S3 and deletes the folder from the local host.
+        
+        :param submission_id: ID of the submission
+        :param submission_folder: Path to the submission folder on the local host
+        """
+        try:
+            # Define the S3 bucket and folder path
+            s3_bucket = SUBMISSION_S3_BUCKET  # Replace with your S3 bucket name
+            s3_folder = f"{user_id}/{problem_id}/{submission_id}/"
+
+            # Iterate through all files in the submission folder
+            for root, _, files in os.walk(submission_folder):
+                for file_name in files:
+                    local_file_path = os.path.join(root, file_name)
+                    s3_object_path = os.path.join(s3_folder, file_name)
+
+                    # Preserve the directory structure in S3 by calculating the relative path
+                    relative_path = os.path.relpath(local_file_path, submission_folder)
+                    s3_object_path = os.path.join(s3_folder, relative_path)
+
+                    # Upload the file to S3
+                    upload_file(local_file_path, s3_bucket, s3_object_path)
+                    print(f"Uploaded {local_file_path} to S3 at {s3_object_path}")
+
+            # Delete the local submission folder after successful upload
+            shutil.rmtree(submission_folder)
+            print(f"Deleted local folder: {submission_folder}")
+
+        except Exception as e:
+            print(f"Error during copy_to_s3_and_cleanup: {e}")
+            raise
+
     async def handle_submission(self, submission_id, files_metadata, language, user_id, problem_id):
         
         await asyncio.sleep(5)  # Simulate processing delay
@@ -50,6 +87,7 @@ class SubmissionHandler:
         self.submission_store[submission_id]["state"] = SubmissionState.COMPLETED.value
         self.submission_store[submission_id]["result"] = result
 
+        await self.copy_to_s3_and_cleanup(user_id, problem_id, submission_id, submission_folder)
 
         return {"submission_id": submission_id, "state": SubmissionState.COMPLETED.value, "result": result}
 
