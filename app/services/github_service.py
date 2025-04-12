@@ -12,17 +12,18 @@ def get_github_access_token(code: str) -> str:
         "client_secret": GITHUB_CLIENT_SECRET,
         "code": code
     }
-    response = requests.post(TOKEN_URL, headers=headers, data=data)
+    response = requests.post(TOKEN_URL, headers=headers, data=data, verify=False)
     if response.status_code != 200:
         raise Exception("Failed to retrieve GitHub access token")
     return response.json().get("access_token")
 
 def get_github_primary_email(token: str) -> str:
     headers = {"Authorization": f"Bearer {token}"}
-    response = requests.get(EMAIL_URL, headers=headers)
+    response = requests.get(EMAIL_URL, headers=headers, verify=False)
     if response.status_code != 200:
         raise Exception("Failed to retrieve GitHub emails")
     emails = response.json()
+    print("emails", emails)
     for email_entry in emails:
         if email_entry.get("primary") and email_entry.get("verified"):
             return email_entry.get("email")
@@ -30,7 +31,7 @@ def get_github_primary_email(token: str) -> str:
 
 def get_github_username(token: str) -> str:
     headers = {"Authorization": f"Bearer {token}"}
-    response = requests.get(USER_URL, headers=headers)
+    response = requests.get(USER_URL, headers=headers, verify=False)
     if response.status_code != 200:
         raise Exception("Failed to retrieve GitHub user details")
     return response.json().get("login")

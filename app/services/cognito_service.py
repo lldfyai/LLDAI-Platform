@@ -8,7 +8,6 @@ from jwt import PyJWKClient
 from fastapi import HTTPException
 from config import COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 COGNITO_REGION= "us-west-2"
-print("cognitoClientId",COGNITO_CLIENT_ID, "cognitoClientSecret",COGNITO_CLIENT_SECRET, "userPoolid",USER_POOL_ID, "awsAccessKeyId",AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
 # Initialize the Cognito client
 cognito = boto3.client("cognito-idp", region_name=COGNITO_REGION,
                        aws_access_key_id= AWS_ACCESS_KEY_ID,
