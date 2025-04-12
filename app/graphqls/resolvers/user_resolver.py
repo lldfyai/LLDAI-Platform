@@ -3,6 +3,7 @@ from services import cognito_service, github_service
 from services.user_manager import UserManager
 from datetime import datetime
 import os
+import requests
 from ariadne import make_executable_schema, load_schema_from_path
 query = QueryType()
 mutation = MutationType()
@@ -12,6 +13,10 @@ user_manager = UserManager()
 @query.field("githubUsernameEmail")
 def resolve_github_username_email(_, info, input):
     token = github_service.get_github_access_token(input["githubCode"])
+    requests.get(
+        "https://api.github.com/",
+        headers={"Authorization": f"Bearer {token}"})
+    print("successful ping")
     return {
         "githubToken": token,
         "username": github_service.get_github_username(token),

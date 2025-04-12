@@ -31,7 +31,7 @@ def get_github_primary_email(token: str) -> str:
 
 def get_github_username(token: str) -> str:
     headers = {"Authorization": f"Bearer {token}"}
-    response = requests.get(USER_URL, headers=headers, timeout=5, verify=False)
+    response = requests.get(USER_URL, headers=headers, timeout=5 , verify=False)
     if response.status_code != 200:
         raise Exception("Failed to retrieve GitHub user details")
     return response.json().get("login")
