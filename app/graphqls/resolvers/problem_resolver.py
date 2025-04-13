@@ -21,6 +21,17 @@ def resolve_problems(_, info, userId):
     problems_metadata = problems_manager.get_problems()
     if not problems_metadata:
         raise Exception(f"No problems found for user with ID {userId}.")
-    return [problem.to_dict() for problem in problems_metadata]
+        # Convert SQLAlchemy objects to dictionaries
+    return [
+        {
+            "problemId": problem.problemId,
+            "problemTitle": problem.problemTitle,
+            "difficulty": problem.difficulty.name if problem.difficulty else None,
+            "tags": problem.tags,
+            "timeLimit": problem.timeLimit,
+            "memoryLimit": problem.memoryLimit
+        }
+        for problem in problems_metadata
+    ]
 
 problemSchema = make_executable_schema(type_defs, query)
