@@ -18,7 +18,7 @@ def resolve_problem(_, info, problemId):
 @query.field("problems")
 def resolve_problems(_, info, userId):
     # Call the resolver function to fetch all problems for the user
-    problems_metadata = problems_manager.get_problems(userId)
+    problems_metadata = problems_manager.get_problems()
     if not problems_metadata:
         raise Exception(f"No problems found for user with ID {userId}.")
     return [problem.to_dict() for problem in problems_metadata]
