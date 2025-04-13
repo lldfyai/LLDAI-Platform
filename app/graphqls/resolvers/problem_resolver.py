@@ -24,8 +24,8 @@ def resolve_problems(_, info, userId):
         # Convert SQLAlchemy objects to dictionaries
     return [
         {
-            "problemId": problem.problemId,
-            "problemTitle": problem.problemTitle,
+            "problem_id": problem.problemId,
+            "problem_title": problem.problemTitle,
             "difficulty": problem.difficulty.name if problem.difficulty else None,
             "tags": problem.tags,
             "timeLimit": problem.timeLimit,
