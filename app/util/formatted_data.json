@@ -1,6 +1,6 @@
 {
     "problem_id": "1",
-    "lang": "java",
+    "lang": "JAVA",
     "files_metadata": {
         "test_input.txt": "3\n2\nAlice\nBob\n1 1\n1 2\n2 2\n3 1\n2 1\n1 3\n3 2\n2 3\n3 3\nexit\n\n4\n3\nDavid\nEva\nFrank\n1 1\n1 1\n2 2\nexit\n\n5\n2\nLuke\nMark\n4 5\nexit\n\n3\n2\nJohn\nDoe\nexit",
         "expected_output.txt": "X - -\n- - -\n- - -\nX O -\n- - -\n- - -\nX O -\n- X -\n- - -\nX O -\n- X -\nO - -\nX O -\nX X -\nO - -\nX O O\nX X -\nO - -\nX O O\nX X -\nO X -\nX O O\nX X O\nO X -\nX O O\nX X O\nO X X\nBob won the game\nGame Over\n\nX - - -\n- - - -\n- - - -\n- - - -\nInvalid Move\nX - - -\n- O - -\n- - - -\n- - - -\nGame Over\n\n- - - - -\n- - - - -\n- - - - -\n- - - - X\n- - - - -\nGame Over\n\nGame Over",

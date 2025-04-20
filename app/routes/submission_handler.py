@@ -12,23 +12,27 @@ from pydantic import BaseModel
 from config import SUBMISSION_S3_BUCKET
 import shutil
 from client.s3_client import upload_file
+from dao.submission_dao import SubmissionDAO
+from models.db.tables import SubmissionMetadata
+from models.db.enums import Language, SubmissionState
+from datetime import datetime
+from services.submission_manager import SubmissionManager
 
 
 router = APIRouter()
 
-class SubmissionState(Enum):
-    RECEIVED = "Received"
-    PROCESSING = "Processing"
-    COMPLETED = "Completed"
+class SupportedLanguages(Enum):
+    PYTHON = "PYTHON"
+    JAVA = "JAVA"
+    C = "C"
+    CPP = "CPP"
 
 class SubmissionHandler:
     def __init__(self):
         self.executor = CodeExecutor()
-        # ToDo: Results store for submissions can be rerieved from DB as well
-        self.submission_store = {}  # Tracks submission state & results
+        self.submission_manager = SubmissionManager()
 
     async def save_files(self, files_metadata, user_folder):
-        # ToDo: Implement file saving logic in S3 bucket
         file_paths = []
         for filename, content in files_metadata.items():
             file_path = os.path.join(user_folder, filename)
@@ -73,20 +77,28 @@ class SubmissionHandler:
 
     async def handle_submission(self, submission_id, files_metadata, language, user_id, problem_id):
         
-        await asyncio.sleep(5)  # Simulate processing delay
+        await asyncio.sleep(15)  # Simulate processing delay
         submission_folder = os.path.join(UPLOAD_DIR, user_id, problem_id, submission_id)
         os.makedirs(submission_folder, exist_ok=True)
 
         await self.save_files(files_metadata, submission_folder)
-        self.submission_store[submission_id]["state"] = SubmissionState.PROCESSING.value
-
-        await asyncio.sleep(5)  # Simulate processing delay
+        self.submission_manager.partial_update_submission(
+            submission_id=submission_id,
+            updates={"state": SubmissionState.PROCESSING})
+            
+        await asyncio.sleep(15)  # Simulate processing delay
 
         result = self.executor.execute_code_in_docker(submission_id, problem_id, language, submission_folder)
 
-        self.submission_store[submission_id]["state"] = SubmissionState.COMPLETED.value
-        self.submission_store[submission_id]["result"] = result
-
+        self.submission_manager.partial_update_submission(
+            submission_id=submission_id,
+            updates={
+                "state": SubmissionState.COMPLETED,
+                "statusCode": result.get("output").get("status_code"),
+                "testsPassed": result.get("output").get("total_correct"),
+                "totalTests": result.get("output").get("total_testcases")
+            })
+            
         await self.copy_to_s3_and_cleanup(user_id, problem_id, submission_id, submission_folder)
 
         return {"submission_id": submission_id, "state": SubmissionState.COMPLETED.value, "result": result}
@@ -97,17 +109,24 @@ submission_handler = SubmissionHandler()
 
 class SubmissionRequest(BaseModel):
     problem_id: str
-    lang: str
+    lang: SupportedLanguages
     files_metadata: dict
 
 @router.post("/submit/")
 async def submit_code(submission: SubmissionRequest, background_tasks: BackgroundTasks):
     try:
         submission_id = str(uuid.uuid4())
-        submission_handler.submission_store[submission_id] = {
-            "state": SubmissionState.RECEIVED.value,
-            "result": None
-        }
+        new_submission = SubmissionMetadata(
+            submissionId=submission_id, 
+            problemId=submission.problem_id,
+            userId=1,  # Hardcoding the user_id for now. Should be fetched from the JWT token
+            language=Language[submission.lang.name],
+            state=SubmissionState.RECEIVED,
+            createdAt=datetime.now()
+        )
+        # Save the submission metadata to the database
+        submission_handler.submission_manager.create_submission(new_submission)
+
         background_tasks.add_task(submission_handler.handle_submission, submission_id, submission.files_metadata, submission.lang, "1", submission.problem_id) # Hardcoding the user_id for now. Should be fetched from the JWT token
         return JSONResponse({"submission_id": submission_id, "state": SubmissionState.RECEIVED.value})
     except Exception as e:
@@ -117,11 +136,31 @@ async def submit_code(submission: SubmissionRequest, background_tasks: Backgroun
 async def sse_status(submission_id: str):
     """Streams submission status updates using SSE (Server-Sent Events)."""
     async def event_stream():
-        while  submission_handler.submission_store.get(submission_id, {}).get("state") not in [SubmissionState.COMPLETED.value, "Failed"]:
-            yield f"data: {json.dumps( submission_handler.submission_store[submission_id])}\n\n"
+        while True:
+            # Fetch the submission state from the database using submission_manager
+            submission = submission_handler.submission_manager.get_submission(submission_id)
+            if not submission:
+                raise HTTPException(status_code=404, detail="Submission not found")
+
+            # Construct the response data
+            data = {
+                "state": submission.state.value,
+                "result": {
+                    "statusCode": submission.statusCode,
+                    "testsPassed": submission.testsPassed,
+                    "totalTests": submission.totalTests,
+                    "executionTime": submission.executionTime,      
+                    "memory": submission.memory
+                } if submission.state == SubmissionState.COMPLETED else None
+            }
+
+            # Stream the current state
+            yield f"data: {json.dumps(data)}\n\n"
+
+            # Break the loop if the submission is completed
+            if submission.state == SubmissionState.COMPLETED:
+                break
+
             await asyncio.sleep(1)  # Reduce polling frequency
-
-        # Final update
-        yield f"data: {json.dumps( submission_handler.submission_store[submission_id])}\n\n"
-
+        
     return StreamingResponse(event_stream(), media_type="text/event-stream")
