@@ -5,10 +5,10 @@ from ariadne.asgi import GraphQL
 from config import UPLOAD_DIR
 from fastapi.middleware.cors import CORSMiddleware
 from graphqls.resolvers.problem_resolver import problemSchema
+from graphqls.resolvers.user_resolver import userSchema
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from services.cognito_service import verify_auth_token
-from graphqls.userSchema import userSchema
 app = FastAPI(
     title="LLDify Platform",
     description="API to handle multi-file code submissions and execution",

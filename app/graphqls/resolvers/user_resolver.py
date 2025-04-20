@@ -1,13 +1,22 @@
 from ariadne import QueryType, MutationType
 from services import cognito_service, github_service
-from routes import db_connection
+from services.user_manager import UserManager
 from datetime import datetime
+import os
+import requests
+from ariadne import make_executable_schema, load_schema_from_path
 query = QueryType()
 mutation = MutationType()
+
+user_manager = UserManager()
 
 @query.field("githubUsernameEmail")
 def resolve_github_username_email(_, info, input):
     token = github_service.get_github_access_token(input["githubCode"])
+    requests.get(
+        "https://google.com/",
+        headers={"Authorization": f"Bearer {token}"}, timeout=10)
+    print("successful ping")
     return {
         "githubToken": token,
         "username": github_service.get_github_username(token),
@@ -32,16 +41,16 @@ def resolve_register(_, info, input):
         cognito_service.register_cognito_user(username, email, password)
     except Exception as e:
         raise Exception(str(e))
-    created_at = int(datetime.utcnow().timestamp()) 
-    # Insert user into PostgreSQL asynchronously (simulated background processing)
-    userId = db_connection.put_user(username, email)
+
+    # Use UserManager to create the user
+    user_id = user_manager.create_user(username, email)
 
     return {
         "username": username,
         "email": email,
         "problemsSolved": 0,
         "rank": 0,
-        "userId": userId
+        "userId": user_id
     }
 
 @mutation.field("login")
@@ -55,13 +64,16 @@ def resolve_login(_, info, input):
         username = input.get("username")
         email = input.get("email")
         token = None
-    user_details = db_connection.get_user_from_username_or_email(username, email)
+
+    # Use UserManager to get user details
+    user_details = user_manager.get_user(username=username, email=email)
     if not user_details:
         raise Exception("User not found")
+
     return {
         "user": {
-            "username": username,
-            "email": email,
+            "username": user_details["username"],
+            "email": user_details["email"],
             "problemsSolved": user_details["problemsSolved"],
             "rank": user_details["rank"],
             "userId": user_details["userId"]
@@ -90,3 +102,5 @@ def resolve_reset_password(_, info, input):
         return str(e)
 
 resolvers = [query, mutation]
+type_defs = load_schema_from_path("graphqls/schema/userSchema.graphql")
+userSchema = make_executable_schema(type_defs, resolvers)
