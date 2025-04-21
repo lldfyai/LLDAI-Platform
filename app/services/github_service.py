@@ -33,7 +33,7 @@ def get_github_username(token: str) -> str:
     headers = {"Authorization": f"Bearer {token}"}
     print("headers", headers)
     print("USER_URL", USER_URL)
-    response = requests.get(USER_URL, headers=headers, timeout=5 , verify=False)
+    response = requests.get(USER_URL, headers=headers, timeout=60 , verify=False)
     if response.status_code != 200:
         raise Exception("Failed to retrieve GitHub user details")
     return response.json().get("login")
