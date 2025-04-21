@@ -26,14 +26,14 @@ def resolve_github_username_email(_, info, input):
 
 @mutation.field("register")
 def resolve_register(_, info, input):
-    return {
-        "username": "Hello World"}
-    '''username = input.get("username")
+    username = input.get("username")
     email = input.get("email")
     password = input.get("password")
     github_token = input.get("githubToken")
     print("github_token", github_token)
-    if not email:
+    return {
+        "username": "Hello World"}
+    '''if not email:
         if not github_token:
             raise Exception("GitHub OAuth code required if username or email is missing")
         token = github_token
