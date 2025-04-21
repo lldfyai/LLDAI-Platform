@@ -31,17 +31,16 @@ def resolve_register(_, info, input):
     password = input.get("password")
     github_token = input.get("githubToken")
     print("github_token", github_token)
-    return {
-        "username": "Hello World"}
-    '''if not email:
+    if not email:
         if not github_token:
             raise Exception("GitHub OAuth code required if username or email is missing")
         token = github_token
         if not username:
             username = github_service.get_github_username(token)
         email = github_service.get_github_primary_email(token)
-
-    try:
+    return {
+        "username": "Hello World"}
+    '''try:
         cognito_service.register_cognito_user(username, email, password)
     except Exception as e:
         raise Exception(str(e))
