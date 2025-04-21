@@ -13,6 +13,7 @@ user_manager = UserManager()
 @query.field("githubUsernameEmail")
 def resolve_github_username_email(_, info, input):
     token = github_service.get_github_access_token(input["githubCode"])
+    print("github_token", token)
     requests.get(
         "https://google.com/",
         headers={"Authorization": f"Bearer {token}"}, timeout=10)
@@ -29,6 +30,7 @@ def resolve_register(_, info, input):
     email = input.get("email")
     password = input.get("password")
     github_token = input.get("githubToken")
+    print("github_token", github_token)
     if not email:
         if not github_token:
             raise Exception("GitHub OAuth code required if username or email is missing")
