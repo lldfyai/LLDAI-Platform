@@ -26,7 +26,9 @@ def resolve_github_username_email(_, info, input):
 
 @mutation.field("register")
 def resolve_register(_, info, input):
-    username = input.get("username")
+    return {
+        "username": "Hello World"}
+    '''username = input.get("username")
     email = input.get("email")
     password = input.get("password")
     github_token = input.get("githubToken")
@@ -53,7 +55,7 @@ def resolve_register(_, info, input):
         "problemsSolved": 0,
         "rank": 0,
         "userId": user_id
-    }
+    }'''
 
 @mutation.field("login")
 def resolve_login(_, info, input):
