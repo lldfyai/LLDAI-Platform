@@ -48,8 +48,8 @@ app.add_middleware(
 app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
 graphql_app = GraphQL(problemSchema, debug=True)
 app.add_route("/graphql", graphql_app)
-graphql_app = GraphQL(userSchema, debug=True)
-app.add_route("/auth", graphql_app)
+graphql_app2 = GraphQL(userSchema, debug=True)
+app.add_route("/auth2", graphql_app2)
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Code Execution Platform!"}
