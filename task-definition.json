@@ -15,7 +15,7 @@
         }
       ],
       "essential": true,
-       "environment": [
+      "environment": [
         {
           "name": "DOCKER_HOST",
           "value": "unix:///var/run/docker.sock"
@@ -116,5 +116,13 @@
   "runtimePlatform": {
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-0e625a5aea10105e9"  // Replace with your public subnet ID
+      ],
+      "assignPublicIp": "ENABLED" // Enable public IP for Fargate tasks or EC2 instances in public subnets
+    }
   }
 }
