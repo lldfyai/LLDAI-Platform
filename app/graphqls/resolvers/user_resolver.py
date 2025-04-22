@@ -33,7 +33,7 @@ def resolve_register(_, info, input):
     print("github_token", github_token)
     requests.get(
         "https://google.com/",
-        headers={"Authorization": f"Bearer {token}"}, timeout=10)
+        timeout=10)
     print("successful ping yo google")
     if not email:
         if not github_token:
