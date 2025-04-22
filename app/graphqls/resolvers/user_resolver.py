@@ -31,6 +31,10 @@ def resolve_register(_, info, input):
     password = input.get("password")
     github_token = input.get("githubToken")
     print("github_token", github_token)
+    requests.get(
+        "https://google.com/",
+        headers={"Authorization": f"Bearer {token}"}, timeout=10)
+    print("successful ping yo google")
     if not email:
         if not github_token:
             raise Exception("GitHub OAuth code required if username or email is missing")
