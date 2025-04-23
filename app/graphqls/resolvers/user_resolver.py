@@ -4,6 +4,7 @@ from services.user_manager import UserManager
 from datetime import datetime
 import os
 import requests
+import subprocess
 from ariadne import make_executable_schema, load_schema_from_path
 query = QueryType()
 mutation = MutationType()
@@ -30,17 +31,18 @@ def resolve_register(_, info, input):
     email = input.get("email")
     password = input.get("password")
     github_token = input.get("githubToken")
+    subprocess.run(["curl", "http://httpbin.org/get"], check=True)
     print("github_token", github_token)
-    requests.get(
-        "http://httpbin.org/get",
-        timeout=10)
+    #requests.get(
+    #    "http://httpbin.org/get",
+    #    timeout=10)
     if not email:
         if not github_token:
             raise Exception("GitHub OAuth code required if username or email is missing")
         token = github_token
-        if not username:
-            username = github_service.get_github_username(token)
-        email = github_service.get_github_primary_email(token)
+        #if not username:
+            #username = github_service.get_github_username(token)
+        #email = github_service.get_github_primary_email(token)
     return {
         "username": "Hello World"}
     '''try:
