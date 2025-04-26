@@ -15,9 +15,6 @@ user_manager = UserManager()
 def resolve_github_username_email(_, info, input):
     token = github_service.get_github_access_token(input["githubCode"])
     print("github_token", token)
-    requests.get(
-        "http://httpbin.org/get",
-        headers={"Authorization": f"Bearer {token}"}, timeout=10)
     print("successful ping")
     return {
         "githubToken": token,
