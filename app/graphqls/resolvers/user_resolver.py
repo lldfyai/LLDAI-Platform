@@ -31,7 +31,6 @@ def resolve_register(_, info, input):
     email = input.get("email")
     password = input.get("password")
     github_token = input.get("githubToken")
-    subprocess.run(["curl", "http://httpbin.org/get"], check=True)
     print("github_token", github_token)
     #requests.get(
     #    "http://httpbin.org/get",
