@@ -98,7 +98,7 @@
   ],
   "taskRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
   "executionRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
-  "networkMode": "awsvpc",
+  "networkMode": "host",
   "volumes": [
     {
       "name": "docker-socket",
@@ -116,17 +116,5 @@
   "runtimePlatform": {
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
-  },
-    "awsvpcConfiguration": {
-      "subnets": [
-        "subnet-00143cd4d84c17763",
-        "subnet-00b49adc48bbd934d",
-        "subnet-0e625a5aea10105e9",
-        "subnet-026b40820df091b46"      
-      ],
-      "securityGroups": [
-        "sg-06698391c574ecc30"
-      ],
-      "assignPublicIp": "ENABLED"
-    }
+  }
 }
