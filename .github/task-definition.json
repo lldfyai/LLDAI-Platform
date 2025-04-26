@@ -48,5 +48,17 @@
   "runtimePlatform": {
     "operatingSystemFamily": "LINUX",
     "cpuArchitecture": "X86_64"
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-00143cd4d84c17763"      
+      ],
+      "securityGroups": [
+        "sg-06698391c574ecc30"
+      ],
+      "assignPublicIp": "ENABLED"
+    }
   }
+  
 }
