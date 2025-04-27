@@ -120,5 +120,3 @@ jobs:
               securityGroups:
                 - "sg-06698391c574ecc30"
               assignPublicIp: ENABLED
-          
-  
