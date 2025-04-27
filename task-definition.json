@@ -98,7 +98,7 @@
   ],
   "taskRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
   "executionRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
-  "networkMode": "bridge",
+  "networkMode": "awsvpc",
   "volumes": [
     {
       "name": "docker-socket",
