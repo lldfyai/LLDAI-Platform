@@ -93,7 +93,8 @@
           "awslogs-stream-prefix": "ecs"
         }
       },
-      "systemControls": []
+      "systemControls": [],
+      "enableExecuteCommand": true
     }
   ],
   "taskRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
@@ -116,5 +117,6 @@
   "runtimePlatform": {
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
-  }
+  },
+  "enableExecuteCommand": true
 }
