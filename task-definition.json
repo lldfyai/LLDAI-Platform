@@ -93,8 +93,7 @@
           "awslogs-stream-prefix": "ecs"
         }
       },
-      "systemControls": [],
-      "enableExecuteCommand": true
+      "systemControls": []
     }
   ],
   "taskRoleArn": "arn:aws:iam::816069149838:role/ecsTaskExecutionRole",
