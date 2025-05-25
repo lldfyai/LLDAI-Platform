@@ -105,6 +105,7 @@ jobs:
             SQLALCHEMY_DB_HOST=${{ secrets.SQLALCHEMY_DB_HOST }}
 
       - name: Deploy Amazon ECS task definition
+        id: deploy-task-def
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
@@ -114,10 +115,15 @@ jobs:
 
       - name: Update ECS Service
         run: |
+          TASK_DEFINITION=$(aws ecs describe-task-definition \
+            --task-definition lldfyTasksFamily \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.ECS_SERVICE }} \
-            --task-definition ${{ steps.render-task-definition.outputs.task-definition }} \
+            --task-definition ${TASK_DEFINITION} \
             --load-balancers targetGroupArn=arn:aws:elasticloadbalancing:us-west-2:816069149838:targetgroup/lldfy-instance-tg/5692a7e37b036a7d,containerName=${{ env.CONTAINER_NAME }},containerPort=8000 \
             --force-new-deployment
 
