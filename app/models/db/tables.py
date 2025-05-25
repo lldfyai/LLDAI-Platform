@@ -10,7 +10,7 @@ class UserMetadata(Base):
     __tablename__ = 'UserMetadata'
     userId = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False)
-    username = Column(String(255), nullable=True)  # Nullable as per schema
+    userName = Column(String(255), nullable=True)  # Nullable as per schema
     problemssolved = Column(Integer, nullable=True, default=0, server_default='0')
     rank = Column(Integer, nullable=True, default=0, server_default='0')
     created_at = Column(TIMESTAMP, nullable=True, server_default=func.now())  # Default to CURRENT_TIMESTAMP
