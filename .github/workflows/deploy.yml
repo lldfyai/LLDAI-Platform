@@ -104,18 +104,20 @@ jobs:
             COGNITO_CLIENT_SECRET=${{ secrets.COGNITO_CLIENT_SECRET }}
             SQLALCHEMY_DB_HOST=${{ secrets.SQLALCHEMY_DB_HOST }}
 
-      - name: Deploy to ECS Service
+      - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
-          
-      - name: Update ECS Service Network Configuration
+          wait-for-service-stability: true
+
+      - name: Update ECS Service
         run: |
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.ECS_SERVICE }} \
-            --network-configuration "awsvpcConfiguration={subnets=[\"subnet-00b49adc48bbd934d\",\"subnet-0e625a5aea10105e9\",\"subnet-026b40820df091b46\",\"subnet-00143cd4d84c17763\"],securityGroups=[\"sg-06698391c574ecc30\"]}" \
+            --task-definition ${{ steps.render-task-definition.outputs.task-definition }} \
+            --load-balancers targetGroupArn=arn:aws:elasticloadbalancing:us-west-2:816069149838:targetgroup/lldfy-instance-tg/5692a7e37b036a7d,containerName=${{ env.CONTAINER_NAME }},containerPort=8000 \
             --force-new-deployment
 
