@@ -16,7 +16,7 @@ class UserDao:
         """
         session = next(get_db())
         try:
-            new_user = UserMetadata(username=username, email=email, created_at=created_at)
+            new_user = UserMetadata(userName=username, email=email, created_at=created_at)
             session.add(new_user)
             session.commit()
             session.refresh(new_user)  # Refresh to get the generated userId
@@ -37,7 +37,7 @@ class UserDao:
         session = next(get_db())
         try:
             user = session.query(UserMetadata).filter(
-                (UserMetadata.username == username) | (UserMetadata.email == email)
+                (UserMetadata.userName == username) | (UserMetadata.email == email)
             ).first()
 
             if user:
