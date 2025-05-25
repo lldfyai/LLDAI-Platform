@@ -103,19 +103,6 @@ jobs:
             COGNITO_CLIENT_ID=${{ secrets.COGNITO_CLIENT_ID }}
             COGNITO_CLIENT_SECRET=${{ secrets.COGNITO_CLIENT_SECRET }}
             SQLALCHEMY_DB_HOST=${{ secrets.SQLALCHEMY_DB_HOST }}
-          network-configuration: |
-            {
-              "awsvpcConfiguration": {
-                "subnets": [
-                  "subnet-00b49adc48bbd934d",
-                  "subnet-0e625a5aea10105e9",
-                  "subnet-026b40820df091b46",
-                  "subnet-00143cd4d84c17763"
-                ],
-                "securityGroups": ["sg-06698391c574ecc30"],
-                "assignPublicIp": "ENABLED"
-              }
-            }
 
       - name: Deploy to ECS Service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
