@@ -49,7 +49,7 @@ app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissio
 graphql_app = GraphQL(problemSchema, debug=True)
 app.add_route("/graphql", graphql_app)
 graphql_app2 = GraphQL(userSchema, debug=True)
-app.add_route("/auth2", graphql_app2)
+app.add_route("/auth", graphql_app2)
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Code Execution Platform!"}
