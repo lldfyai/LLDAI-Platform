@@ -28,7 +28,7 @@ def fetch_problems_metadata(user_id: int) -> List[Dict[str, Any]]:
     try:
         # Prepare SQL query to fetch data from the ProblemMetadata table along with solvedStatus for the given user_id
         query = '''
-        SELECT pm."problemId", pm."problemTitle", pm.difficulty, pm."Tags", uss."solvedStatus"
+        SELECT pm."problemId", pm."problemTitle", pm.difficulty, pm."tags", uss."solvedStatus"
         FROM public."ProblemMetadata" pm
         LEFT JOIN public."UserSubmissionStats" uss 
         ON pm."problemId" = uss."problemId" AND uss."userId" = %s;
@@ -47,7 +47,7 @@ def fetch_problems_metadata(user_id: int) -> List[Dict[str, Any]]:
                 "problemId": row[0],
                 "problemTitle": row[1],
                 "difficulty": row[2],
-                "Tags": row[3],
+                "tags": row[3],
                 "solvedStatus": row[4] if row[4] is not None else 'UNATTEMPTED'  # Default to 'UNATTEMPTED' if `solvedStatus` is None
             }
             result.append(problem)
@@ -63,7 +63,7 @@ def fetch_problem_metadata(user_id: int, problem_id: int) -> Optional[Dict[str, 
     try:
         # Prepare SQL query to fetch data for a specific problemId for a specific userId
         query = '''
-        SELECT pm."problemId", pm."problemTitle", pm.difficulty, pm."Tags", pm.description, uss."solvedStatus"
+        SELECT pm."problemId", pm."problemTitle", pm.difficulty, pm."tags", pm.description, uss."solvedStatus"
         FROM public."ProblemMetadata" pm
         LEFT JOIN public."UserSubmissionStats" uss ON pm."problemId" = uss."problemId" AND uss."userId" = %s
         WHERE pm."problemId" = %s;
@@ -81,7 +81,7 @@ def fetch_problem_metadata(user_id: int, problem_id: int) -> Optional[Dict[str, 
                 "problemId": row[0],
                 "problemTitle": row[1],
                 "difficulty": row[2],
-                "Tags": row[3],
+                "tags": row[3],
                 "description": row[4],
                 "solvedStatus": row[5]
             }
@@ -105,7 +105,7 @@ def insert_problem_metadata(
 ) -> Optional[int]:
     try:
         insert_query = """
-        INSERT INTO "ProblemMetadata" ("problemTitle", difficulty, "Tags", "timeLimit", 
+        INSERT INTO "ProblemMetadata" ("problemTitle", difficulty, "tags", "timeLimit", 
                                        "memoryLimit", s3_path, description)
         VALUES (%s, %s, %s::tag[], %s, %s, %s, %s)
         RETURNING "problemId";
