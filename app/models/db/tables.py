@@ -31,7 +31,7 @@ class UserStats(Base):
 
     userId = Column(
         Integer,
-        ForeignKey("UserMetadata.user_id", ondelete="CASCADE"),
+        ForeignKey("UserMetadata.userId", ondelete="CASCADE"),
         primary_key=True,
     )
     totalSolved    = Column(Integer, nullable=False, default=0)
