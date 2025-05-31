@@ -76,7 +76,7 @@ def resolve_login(_, info, input):
         "user": {
             "username": user_details["username"],
             "email": user_details["email"],
-            "problemsSolved": user_details["problemsSolved"],
+            "problemsSolved": user_details["totalSolved"],
             "rank": user_details["rank"],
             "userId": user_details["userId"]
         },
