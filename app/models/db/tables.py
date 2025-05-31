@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import ARRAY
 from models.db.enums import Difficulty
@@ -10,7 +11,9 @@ class UserMetadata(Base):
     __tablename__ = 'UserMetadata'
     userId = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False)
-    userName = Column(String(255), nullable=True)  # Nullable as per schema # Default to CURRENT_TIMESTAMP
+    userName = Column(String(255), nullable=True)  # Nullable as per schema
+        # Define relationship with UserStats
+    stats = relationship("UserStats", back_populates="user", uselist=False)  # One-to-one relationship
 
 class UserSubmissionStats(Base):
     __tablename__ = 'UserSubmissionStats'
