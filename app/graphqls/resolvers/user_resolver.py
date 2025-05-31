@@ -77,7 +77,7 @@ def resolve_login(_, info, input):
             "username": user_details["username"],
             "email": user_details["email"],
             "problemsSolved": user_details["totalSolved"],
-            "rank": user_details["rank"],
+            "rank": user_details["rating"],
             "userId": user_details["userId"]
         },
         "token": cognito_service.get_login_token(email, username, password),
