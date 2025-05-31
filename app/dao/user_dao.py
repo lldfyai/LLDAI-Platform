@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
-from models.db.tables import UserMetadata, ProblemMetadata
+from models.db.tables import UserMetadata, ProblemMetadata, UserStats
 from dao.connection import get_db
 
 class UserDao:
