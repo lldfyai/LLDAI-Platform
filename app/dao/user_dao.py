@@ -17,7 +17,7 @@ class UserDao:
     session = next(get_db())
     try:
         # Insert user into UserMetadata
-        new_user = UserMetadata(userName=username, email=email, created_at=created_at)
+        new_user = UserMetadata(userName=username, email=email)
         session.add(new_user)
         session.commit()
         session.refresh(new_user)  # Get the generated userId
