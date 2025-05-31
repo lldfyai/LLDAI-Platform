@@ -40,3 +40,5 @@ class UserStats(Base):
     totalSolved    = Column(Integer, nullable=False, default=0)
     acceptanceRate = Column(Integer, nullable=False, default=0)
     rating          = Column(Integer, nullable=False, default=0)
+    # Define relationship with UserMetadata
+    user = relationship("UserMetadata", back_populates="stats")
