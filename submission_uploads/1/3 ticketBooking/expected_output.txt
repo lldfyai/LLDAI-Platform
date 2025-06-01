@@ -1,0 +1,40 @@
+1
+1-Silver-Empty 2-Gold-Empty 3-Platinum-Empty 4-Silver-Empty 5-Gold-Empty
+2
+
+1-Platinum-Empty 2-Platinum-Empty 3-Gold-Empty 4-Silver-Empty
+Ticket 1 Booked for User 1 for Show 1: [2,3]
+1-Platinum-Booked 2-Platinum-Empty 3-Gold-Booked 4-Silver-Empty
+Already booked
+1-Platinum-Booked 2-Platinum-Empty 3-Gold-Booked 4-Silver-Empty
+
+1
+1-Platinum-Empty 2-Platinum-Empty 3-Gold-Empty 4-Silver-Empty
+Ticket 1 Booked for User 1 for Show 1: [1,3]
+1-Platinum-Booked 2-Platinum-Empty 3-Gold-Booked 4-Silver-Empty
+Already booked
+1-Platinum-Booked 2-Platinum-Empty 3-Gold-Booked 4-Silver-Empty
+
+(empty)
+(empty)
+
+Ticket 1 Booked for User 1 for Show 1: [1,2]
+1-Silver-Booked 2-Silver-Booked 3-Gold-Empty 4-Gold-Empty 5-Platinum-Empty
+Already booked
+1-Silver-Booked 2-Silver-Booked 3-Gold-Empty 4-Gold-Empty 5-Platinum-Empty
+1-Silver-Booked 2-Silver-Booked 3-Gold-Empty 4-Gold-Empty 5-Platinum-Empty
+
+1 2 3
+2 3
+1
+
+1-Silver-Empty 2-Gold-Empty 3-Platinum-Empty 4-Silver-Empty 5-Gold-Empty 6-Platinum-Empty
+
+Ticket 1 Booked for User 1 for Show 1: [2]
+1-Gold-Empty 2-Gold-Booked 3-Platinum-Empty 4-Silver-Empty
+Ticket 2 Booked for User 2 for Show 1: [1,4]
+1-Gold-Booked 2-Gold-Booked 3-Platinum-Empty 4-Silver-Booked
+Ticket 3 Booked for User 1 for Show 1: [3]
+1-Gold-Booked 2-Gold-Booked 3-Platinum-Booked 4-Silver-Booked
+Already booked
+1-Gold-Booked 2-Gold-Booked 3-Platinum-Booked 4-Silver-Booked
