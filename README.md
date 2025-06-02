@@ -1,2 +1,9 @@
 # LLDAI-Platform project
 Document : 
+
+## Template for contributing LLD problems
+Hey folks! Thank you for taking out time to contribute LLD problems to the platform. Your expertise & contributions will truly benefit the entire community.
+
+Before you put your thinking hats on and brainstorm on unique & challenging design problems, it is necessary that you get a basic understanding of how we process the problems and evaluate their solutions on the backend and keep the below guidelines in mind while devising these problems.
+
+[LLDAI Problem Contribution Guidelines](https://docs.google.com/document/d/1uu-PMTrACwl0NfW_JKx-h1pdRL_p0gP5dkUHymsdKX0/edit?tab=t.0) 
