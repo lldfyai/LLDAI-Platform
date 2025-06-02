@@ -16,10 +16,19 @@ def resolve_github_username_email(_, info, input):
     token = github_service.get_github_access_token(input["githubCode"])
     print("github_token", token)
     print("successful ping")
+    username = github_service.get_github_username(token)
+    email = github_service.get_github_primary_email(token)
+
+    # Check if the user already exists in Cognito
+    try:
+        user_exists = cognito_service.check_user_exists(email)
+    except Exception as e:
+        raise Exception(f"Error checking user existence: {str(e)}")
     return {
         "githubToken": token,
-        "username": github_service.get_github_username(token),
-        "email": github_service.get_github_primary_email(token)
+        "username": username,
+        "email": email,
+        "existing":  user_exists
     }
 
 @mutation.field("register")

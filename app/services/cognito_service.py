@@ -73,6 +73,26 @@ def verify_auth_token(auth_token: str) -> dict:
 
     return decoded_token
 
+def check_user_exists(email: str) -> bool:
+    """
+    Check if a user exists in Cognito.
+
+    :param email: Email of the user
+    :return: True if the user exists, False otherwise
+    """
+    try:
+        response = cognito.admin_get_user(
+            UserPoolId=USER_POOL_ID,
+            Username=email
+        )
+        return True
+    except cognito.exceptions.UserNotFoundException:
+        return False
+    except Exception as e:
+        print(f"Error checking user existence: {str(e)}")
+        raise e
+    
+
 def get_secret_hash_using_client_id(username, client_id):
     """Generate SECRET_HASH for Cognito authentication."""
     message = username + client_id

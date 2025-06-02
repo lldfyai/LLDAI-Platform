@@ -8,6 +8,7 @@ type GithubUserDetails {
     githubToken: String!
     username: String!
     email: String!
+    existing: Boolean!
 }
 
 input GithubUsernameEmailInput {
