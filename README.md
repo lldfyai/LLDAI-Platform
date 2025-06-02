@@ -1,5 +1,10 @@
 # LLDAI-Platform project
-Document : 
+
+## Backend Architecture
+
+<img width="1238" alt="Screenshot 2025-06-03 at 12 04 56 AM" src="https://github.com/user-attachments/assets/6fa1dcd2-6688-48a0-b448-1ec30009a1b5" />
+
+
 
 ## Template for contributing LLD problems
 Hey folks! Thank you for taking out time to contribute LLD problems to the platform. Your expertise & contributions will truly benefit the entire community.
