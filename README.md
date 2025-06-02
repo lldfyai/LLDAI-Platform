@@ -1,4 +1,4 @@
-# LLDAI-Platform project
+# LLDAI-Platform
 
 ## Backend Architecture
 
