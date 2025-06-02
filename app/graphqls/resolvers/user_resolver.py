@@ -60,12 +60,16 @@ def resolve_register(_, info, input):
     login_token = cognito_service.get_login_token(email, username, password)
 
     return {
-        "username": username,
-        "email": email,
-        "problemsSolved": 0,
-        "rank": 0,
-        "userId": user_id,
-        "token": login_token  # Include the login token in the response
+            "user": {
+            "username": username,
+            "email": email,
+            "problemsSolved": 0,
+            "rank": 0,
+            "userId": user_id
+        },
+
+        "token": login_token,  # Include the login token in the response,
+        "githubToken": github_token  # Include the GitHub token if provided
     }
 
 @mutation.field("login")

@@ -51,7 +51,7 @@ type User {
 }
 
 type Mutation {
-    register(input: RegisterInput!): User
+    register(input: RegisterInput!): AuthResponse
     login(input: LoginInput!): AuthResponse
     forgotPassword(email: String!): String!
     resetPassword(input: ResetPasswordInput!): String!
