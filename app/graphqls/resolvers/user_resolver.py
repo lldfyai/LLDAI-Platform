@@ -38,9 +38,7 @@ def resolve_register(_, info, input):
     password = input.get("password")
     github_token = input.get("githubToken")
     print("github_token", github_token)
-    #requests.get(
-    #    "http://httpbin.org/get",
-    #    timeout=10)
+
     if not email:
         if not github_token:
             raise Exception("GitHub OAuth code required if username or email is missing")
@@ -48,6 +46,8 @@ def resolve_register(_, info, input):
         if not username:
             username = github_service.get_github_username(token)
         email = github_service.get_github_primary_email(token)
+
+    # Register the user in Cognito
     try:
         cognito_service.register_cognito_user(username, email, password)
     except Exception as e:
@@ -56,12 +56,16 @@ def resolve_register(_, info, input):
     # Use UserManager to create the user
     user_id = user_manager.create_user(username, email)
 
+    # Generate login token
+    login_token = cognito_service.get_login_token(email, username, password)
+
     return {
         "username": username,
         "email": email,
         "problemsSolved": 0,
         "rank": 0,
-        "userId": user_id
+        "userId": user_id,
+        "token": login_token  # Include the login token in the response
     }
 
 @mutation.field("login")
