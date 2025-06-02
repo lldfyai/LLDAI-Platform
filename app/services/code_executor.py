@@ -17,14 +17,14 @@ class CodeExecutor:
         
     """Builds a Docker image for the specified language."""    
     def build_docker_image(self, language, submission_folder): 
-        config = LANGUAGE_CONFIG.get(language)
+        config = LANGUAGE_CONFIG.get(language.value.lower())
         if not config:
             return None, "Unsupported language"
         
         image_name = config["image"]
         dockerfile_path = config["dockerfile"]
         try:
-            print(f"Building Docker image for {language}...")
+            print(f"Building Docker image for {language.value}...")
             self.client.images.build(path=".", dockerfile=dockerfile_path, tag=image_name,  buildargs={"JOB_FOLDER": submission_folder})
             print(f"Docker image {image_name} built successfully!")
             return image_name, None
@@ -74,7 +74,7 @@ class CodeExecutor:
 
             
             container.remove()  # Remove the container after copying files
-            response = self.generate_response_model(submission_id, problem_id, language, output_folder)
+            response = self.generate_response_model(submission_id, problem_id, language.value, output_folder)
             return {"state": StateEnum.COMPLETED.value, "output": response}
         except docker.errors.ContainerError as e:
             return {"state": StateEnum.FAILURE.value, "output": ErrorResponseModel.populate_response_model(Errors.SYSTEM_ERROR.status_code, str(e.stderr.decode()), Errors.SYSTEM_ERROR.error_type)}
