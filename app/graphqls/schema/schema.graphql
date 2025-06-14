@@ -4,11 +4,11 @@ type Query {
 }
 
 type Problem {
-    problem_id: Int
-    problem_title: String
+    problemId: Int
+    problemTitle: String
     difficulty: String
     tags: [String]
-    time_limit: Float
-    memory_limit: Float
-    s3_path: String
+    timeLimit: Float
+    memoryLimit: Float
+    s3Path: String
 }
