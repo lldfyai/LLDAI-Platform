@@ -1,8 +1,14 @@
 type Query {
     problems(userId: Int!): [Problem]
     problem(problemId: Int!): Problem
+    githubUsernameEmail(input: GithubUsernameEmailInput!): GithubUserDetails!
 }
-
+type Mutation {
+    register(input: RegisterInput!): AuthResponse
+    login(input: LoginInput!): AuthResponse
+    forgotPassword(email: String!): String!
+    resetPassword(input: ResetPasswordInput!): String!
+}
 type Problem {
     problemId: Int
     problemTitle: String
@@ -63,15 +69,4 @@ type User {
     problemsSolved: Int
     rank: Int
     userId: Int!
-}
-
-type Mutation {
-    register(input: RegisterInput!): AuthResponse
-    login(input: LoginInput!): AuthResponse
-    forgotPassword(email: String!): String!
-    resetPassword(input: ResetPasswordInput!): String!
-}
-
-type Query {
-    githubUsernameEmail(input: GithubUsernameEmailInput!): GithubUserDetails!
 }
