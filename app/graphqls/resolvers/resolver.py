@@ -18,7 +18,14 @@ def resolve_problem(_, info, problemId):
     problem_metadata = problems_manager.get_problem(problemId)
     if problem_metadata is None:
         raise Exception(f"Problem with ID {problemId} not found.")
-    return problem_metadata.to_dict()
+    return  {
+            "problemId": problem_metadata.problemId,
+            "problemTitle": problem_metadata.problemTitle,
+            "difficulty": problem_metadata.difficulty.name if problem_metadata.difficulty else None,
+            "tags": problem_metadata.tags,
+            "timeLimit": problem_metadata.timeLimit,
+            "memoryLimit": problem_metadata.memoryLimit
+        }
 
 @query.field("problems")
 def resolve_problems(_, info, userId):
