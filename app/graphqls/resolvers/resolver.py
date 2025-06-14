@@ -19,12 +19,13 @@ def resolve_problem(_, info, problemId):
     if problem_metadata is None:
         raise Exception(f"Problem with ID {problemId} not found.")
     return  {
-            "problemId": problem_metadata.problemId,
-            "problemTitle": problem_metadata.problemTitle,
+            "problemId": problem_metadata.problem_id,
+            "problemTitle": problem_metadata.problem_title,
             "difficulty": problem_metadata.difficulty.name if problem_metadata.difficulty else None,
             "tags": problem_metadata.tags,
-            "timeLimit": problem_metadata.timeLimit,
-            "memoryLimit": problem_metadata.memoryLimit
+            "timeLimit": problem_metadata.time_limit,
+            "memoryLimit": problem_metadata.memory_limit,
+            "s3Path": problem_metadata.s3_path
         }
 
 @query.field("problems")
