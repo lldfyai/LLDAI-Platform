@@ -1,15 +1,41 @@
-from ariadne import QueryType, MutationType
+from services.problems_manager import ProblemManager
+from ariadne import QueryType,MutationType, make_executable_schema, load_schema_from_path
 from services import cognito_service, github_service
 from services.user_manager import UserManager
-from datetime import datetime
-import os
-import requests
-import subprocess
-from ariadne import make_executable_schema, load_schema_from_path
+type_defs = load_schema_from_path("graphqls/schema/schema.graphql")
+
 query = QueryType()
 mutation = MutationType()
-
 user_manager = UserManager()
+problems_manager = ProblemManager()
+
+
+@query.field("problem")
+def resolve_problem(_, info, problemId):
+    # Call the resolver function to fetch the problem
+    problem_metadata = problems_manager.get_problem(problemId)
+    if problem_metadata is None:
+        raise Exception(f"Problem with ID {problemId} not found.")
+    return problem_metadata.to_dict()
+
+@query.field("problems")
+def resolve_problems(_, info, userId):
+    # Call the resolver function to fetch all problems for the user
+    problems_metadata = problems_manager.get_problems()
+    if not problems_metadata:
+        raise Exception(f"No problems found for user with ID {userId}.")
+        # Convert SQLAlchemy objects to dictionaries
+    return [
+        {
+            "problemId": problem.problemId,
+            "problemTitle": problem.problemTitle,
+            "difficulty": problem.difficulty.name if problem.difficulty else None,
+            "tags": problem.tags,
+            "timeLimit": problem.timeLimit,
+            "memoryLimit": problem.memoryLimit
+        }
+        for problem in problems_metadata
+    ]
 
 @query.field("githubUsernameEmail")
 def resolve_github_username_email(_, info, input):
@@ -119,7 +145,4 @@ def resolve_reset_password(_, info, input):
         return "Password reset successfully" if result else "Password reset failed"
     except Exception as e:
         return str(e)
-
-resolvers = [query, mutation]
-type_defs = load_schema_from_path("graphqls/schema/userSchema.graphql")
-userSchema = make_executable_schema(type_defs, resolvers)
+schema = make_executable_schema(type_defs, query)
