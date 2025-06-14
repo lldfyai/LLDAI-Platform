@@ -1,6 +1,6 @@
 from dao.connection import get_db
 from models.db.tables import SubmissionMetadata 
-
+from typing import List
 class SubmissionDAO:
 
     def create_submission(self, submission):
@@ -41,3 +41,23 @@ class SubmissionDAO:
             session.commit()
             return True
         return False
+    
+
+    def get_submission_metadata(self, problem_id: int, user_id: int) -> List[SubmissionMetadata]:
+        """
+        Fetch submission metadata based on problemId and userId.
+
+        :param problem_id: ID of the problem
+        :param user_id: ID of the user
+        :return: List of SubmissionMetadata objects
+        """
+        session = next(get_db())
+        try:
+            submissions = session.query(SubmissionMetadata).filter(
+                SubmissionMetadata.problemId == problem_id,
+                SubmissionMetadata.userId == user_id
+            ).all()
+            return submissions
+        except Exception as e:
+            print(f"Error fetching submission metadata: {e}")
+            return []

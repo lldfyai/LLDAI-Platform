@@ -2,6 +2,7 @@ type Query {
     problems(userId: Int!): [Problem]
     problem(problemId: Int!): Problem
     githubUsernameEmail(input: GithubUsernameEmailInput!): GithubUserDetails!
+    getSubmissionMetadata(problemId: Int!, userId: Int!): [SubmissionMetadata]!
 }
 type Mutation {
     register(input: RegisterInput!): AuthResponse
@@ -69,4 +70,17 @@ type User {
     problemsSolved: Int
     rank: Int
     userId: Int!
+}
+type SubmissionMetadata {
+    submissionId: ID!
+    problemId: Int!
+    userId: Int!
+    language: String
+    state: String
+    statusCode: Int
+    testsPassed: Int
+    totalTests: Int
+    executionTime: Float
+    memory: Float
+    createdAt: String
 }

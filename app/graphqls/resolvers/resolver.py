@@ -2,12 +2,14 @@ from services.problems_manager import ProblemManager
 from ariadne import QueryType,MutationType, make_executable_schema, load_schema_from_path
 from services import cognito_service, github_service
 from services.user_manager import UserManager
+from services.submission_manager import SubmissionManager
 type_defs = load_schema_from_path("graphqls/schema/schema.graphql")
 
 query = QueryType()
 mutation = MutationType()
 user_manager = UserManager()
 problems_manager = ProblemManager()
+submission_manager = SubmissionManager()
 
 
 @query.field("problem")
@@ -145,4 +147,28 @@ def resolve_reset_password(_, info, input):
         return "Password reset successfully" if result else "Password reset failed"
     except Exception as e:
         return str(e)
+    
+@query.field("getSubmissionMetadata")
+def resolve_get_submission_metadata(_, info, problemId, userId):
+    try:
+        submissions = submission_manager.get_submission_metadata(problemId, userId)
+        return [
+            {
+                "submissionId": str(submission.submissionId),
+                "problemId": submission.problemId,
+                "userId": submission.userId,
+                "language": submission.language.name if submission.language else None,
+                "state": submission.state.name if submission.state else None,
+                "statusCode": submission.statusCode,
+                "testsPassed": submission.testsPassed,
+                "totalTests": submission.totalTests,
+                "executionTime": submission.executionTime,
+                "memory": submission.memory,
+                "createdAt": submission.createdAt.isoformat() if submission.createdAt else None
+            }
+            for submission in submissions
+        ]
+    except Exception as e:
+        print(f"Error resolving getSubmissionMetadata: {e}")
+        return []
 schema = make_executable_schema(type_defs, query)
