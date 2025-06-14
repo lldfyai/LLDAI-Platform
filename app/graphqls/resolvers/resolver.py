@@ -179,4 +179,4 @@ def resolve_get_submission_metadata(_, info, problemId, userId):
     except Exception as e:
         print(f"Error resolving getSubmissionMetadata: {e}")
         return []
-schema = make_executable_schema(type_defs, query)
+schema = make_executable_schema(type_defs, query, mutation)
