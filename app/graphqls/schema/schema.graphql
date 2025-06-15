@@ -1,3 +1,5 @@
+scalar JSON
+
 type Query {
     problems(userId: Int!): [Problem]
     problem(problemId: Int!): Problem
@@ -9,7 +11,9 @@ type Mutation {
     login(input: LoginInput!): AuthResponse
     forgotPassword(email: String!): String!
     resetPassword(input: ResetPasswordInput!): String!
+    submitCode(input: SubmissionInput!) : SubmissionMetadata
 }
+
 type Problem {
     problemId: Int
     problemTitle: String
@@ -75,12 +79,31 @@ type SubmissionMetadata {
     submissionId: ID!
     problemId: Int!
     userId: Int!
-    language: String
-    state: String
+    language: SupportedLanguagesEnum
+    state: SubmissionStateEnum
     statusCode: Int
     testsPassed: Int
     totalTests: Int
     executionTime: Float
     memory: Float
     createdAt: String
+}
+
+input SubmissionInput {
+    problemId : String!
+    lang: SupportedLanguagesEnum
+    filesMetadata : JSON!
+}
+
+enum SupportedLanguagesEnum {
+    PYTHON,
+    JAVA,
+    C,
+    CPP
+}
+
+enum SubmissionStateEnum {
+    Received,
+    Processing,
+    Completed
 }

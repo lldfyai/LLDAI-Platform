@@ -1,15 +1,33 @@
 from services.problems_manager import ProblemManager
-from ariadne import QueryType,MutationType, make_executable_schema, load_schema_from_path
+from ariadne import QueryType,MutationType, make_executable_schema, load_schema_from_path, ScalarType
 from services import cognito_service, github_service
 from services.user_manager import UserManager
 from services.submission_manager import SubmissionManager
+from services.submission_handler import SubmissionHandler
+from models.bl.submission import SubmissionRequest
+from models.bl.enums import SupportedLanguages
+
+
 type_defs = load_schema_from_path("graphqls/schema/schema.graphql")
 
 query = QueryType()
 mutation = MutationType()
+
+json_scalar = ScalarType("JSON")
+
+@json_scalar.serializer
+def serialize_json(value):
+    return value
+
+@json_scalar.value_parser
+def parse_json(value):
+    return value
+
 user_manager = UserManager()
 problems_manager = ProblemManager()
 submission_manager = SubmissionManager()
+submission_handler = SubmissionHandler(submission_manager=submission_manager)
+
 
 
 @query.field("problem")
@@ -18,15 +36,17 @@ def resolve_problem(_, info, problemId):
     problem_metadata = problems_manager.get_problem(problemId)
     if problem_metadata is None:
         raise Exception(f"Problem with ID {problemId} not found.")
-    return  {
+    
+    return {
             "problemId": problem_metadata.problem_id,
             "problemTitle": problem_metadata.problem_title,
-            "difficulty": problem_metadata.difficulty.name if problem_metadata.difficulty else None,
+            "difficulty": problem_metadata.difficulty,
             "tags": problem_metadata.tags,
             "timeLimit": problem_metadata.time_limit,
             "memoryLimit": problem_metadata.memory_limit,
             "s3Path": problem_metadata.s3_path
-        }
+    }
+
 
 @query.field("problems")
 def resolve_problems(_, info, userId):
@@ -179,4 +199,25 @@ def resolve_get_submission_metadata(_, info, problemId, userId):
     except Exception as e:
         print(f"Error resolving getSubmissionMetadata: {e}")
         return []
-schema = make_executable_schema(type_defs, query, mutation)
+
+@mutation.field("submitCode")
+async def resolve_submit_code(_, info, input):
+    problem_id = input.get("problemId")
+    lang = input.get("lang")
+    files_metadata = input.get("filesMetadata")
+
+    submission_request = SubmissionRequest(
+        problem_id=problem_id,
+        lang=SupportedLanguages[lang],
+        files_metadata=json.loads(files_metadata) if isinstance(files_metadata, str) else files_metadata
+    )
+    
+    background_tasks = info.context["background_tasks"]
+
+    submission = await submission_handler.process_submission(submission_request, background_tasks)
+
+    return submission
+
+
+
+schema = make_executable_schema(type_defs, [query, mutation, json_scalar])

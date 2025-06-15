@@ -16,21 +16,35 @@ from dao.submission_dao import SubmissionDAO
 from models.db.tables import SubmissionMetadata
 from models.db.enums import Language, SubmissionState
 from datetime import datetime
-from services.submission_manager import SubmissionManager
+from models.bl.submission import SubmissionRequest
 
 
-router = APIRouter()
-
-class SupportedLanguages(Enum):
-    PYTHON = "PYTHON"
-    JAVA = "JAVA"
-    C = "C"
-    CPP = "CPP"
 
 class SubmissionHandler:
-    def __init__(self):
+    def __init__(self, submission_manager):
         self.executor = CodeExecutor()
-        self.submission_manager = SubmissionManager()
+        self.submission_manager = submission_manager
+
+    async def process_submission(self, submission: SubmissionRequest, background_tasks: BackgroundTasks):
+        try:
+            submission_id = str(uuid.uuid4())
+            new_submission = SubmissionMetadata(
+                submissionId=submission_id, 
+                problemId=submission.problem_id,
+                userId=1,  # Hardcoding the user_id for now. Should be fetched from the JWT token
+                language=Language[submission.lang.name],
+                state=SubmissionState.RECEIVED,
+                createdAt=datetime.now()
+            )
+            # Save the submission metadata to the database
+            self.submission_manager.create_submission(new_submission)            
+            background_tasks.add_task(self.handle_submission, submission_id, submission.files_metadata, submission.lang, "1", submission.problem_id) # Hardcoding the user_id for now. Should be fetched from the JWT token
+
+            print(f"Submission {submission_id} received for problem {submission.problem_id} in language {submission.lang.name}")
+
+            return {"submissionId": submission_id, "state": SubmissionState.RECEIVED.value}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     async def save_files(self, files_metadata, user_folder):
         file_paths = []
@@ -102,65 +116,3 @@ class SubmissionHandler:
         await self.copy_to_s3_and_cleanup(user_id, problem_id, submission_id, submission_folder)
 
         return {"submission_id": submission_id, "state": SubmissionState.COMPLETED.value, "result": result}
-
-
-
-submission_handler = SubmissionHandler()
-
-class SubmissionRequest(BaseModel):
-    problem_id: str
-    lang: SupportedLanguages
-    files_metadata: dict
-
-@router.post("/submit/")
-async def submit_code(submission: SubmissionRequest, background_tasks: BackgroundTasks):
-    try:
-        submission_id = str(uuid.uuid4())
-        new_submission = SubmissionMetadata(
-            submissionId=submission_id, 
-            problemId=submission.problem_id,
-            userId=1,  # Hardcoding the user_id for now. Should be fetched from the JWT token
-            language=Language[submission.lang.name],
-            state=SubmissionState.RECEIVED,
-            createdAt=datetime.now()
-        )
-        # Save the submission metadata to the database
-        submission_handler.submission_manager.create_submission(new_submission)
-
-        background_tasks.add_task(submission_handler.handle_submission, submission_id, submission.files_metadata, submission.lang, "1", submission.problem_id) # Hardcoding the user_id for now. Should be fetched from the JWT token
-        return JSONResponse({"submission_id": submission_id, "state": SubmissionState.RECEIVED.value})
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/sse/status/{submission_id}")
-async def sse_status(submission_id: str):
-    """Streams submission status updates using SSE (Server-Sent Events)."""
-    async def event_stream():
-        while True:
-            # Fetch the submission state from the database using submission_manager
-            submission = submission_handler.submission_manager.get_submission(submission_id)
-            if not submission:
-                raise HTTPException(status_code=404, detail="Submission not found")
-
-            # Construct the response data
-            data = {
-                "state": submission.state.value,
-                "result": {
-                    "statusCode": submission.statusCode,
-                    "testsPassed": submission.testsPassed,
-                    "totalTests": submission.totalTests,
-                    "executionTime": submission.executionTime,      
-                    "memory": submission.memory
-                } if submission.state == SubmissionState.COMPLETED else None
-            }
-
-            # Stream the current state
-            yield f"data: {json.dumps(data)}\n\n"
-
-            # Break the loop if the submission is completed
-            if submission.state == SubmissionState.COMPLETED:
-                break
-
-            await asyncio.sleep(1)  # Reduce polling frequency
-        
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
