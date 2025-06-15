@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from routes import submission_handler
+from routes import sse_route
+from fastapi import BackgroundTasks
 import os
 from ariadne.asgi import GraphQL
 from config import UPLOAD_DIR
@@ -8,6 +9,8 @@ from graphqls.resolvers.resolver import schema
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from services.cognito_service import verify_auth_token
+
+
 app = FastAPI(
     title="LLDify Platform",
     description="API to handle multi-file code submissions and execution",
@@ -44,9 +47,21 @@ app.add_middleware(
 )
 # Add our custom authentication middleware
 #app.add_middleware(AuthMiddleware)
-app.include_router(submission_handler.router, prefix="/api/v1", tags=["Submissions"])
-graphql_app = GraphQL(schema, debug=True)
-app.add_route("/graphql", graphql_app)
+app.include_router(sse_route.router, prefix="/api/v1", tags=["SSE"])
+
+
+
+@app.post("/graphql")
+async def graphql_server(request: Request, background_tasks: BackgroundTasks):
+    context = {
+        "request": request,
+        "background_tasks": background_tasks,
+    }
+    graphql = GraphQL(schema, context_value=context)
+    return await graphql.handle_request(request)
+
+
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Code Execution Platform!"}
