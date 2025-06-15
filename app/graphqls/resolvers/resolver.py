@@ -6,7 +6,7 @@ from services.submission_manager import SubmissionManager
 from services.submission_handler import SubmissionHandler
 from models.bl.submission import SubmissionRequest
 from models.bl.enums import SupportedLanguages
-
+from fastapi import Response
 
 type_defs = load_schema_from_path("graphqls/schema/schema.graphql")
 
@@ -89,6 +89,7 @@ def resolve_github_username_email(_, info, input):
 
 @mutation.field("register")
 def resolve_register(_, info, input):
+    response: Response = info.context["response"]  # Get the Response object from the context
     username = input.get("username")
     email = input.get("email")
     password = input.get("password")
@@ -114,7 +115,14 @@ def resolve_register(_, info, input):
 
     # Generate login token
     login_token = cognito_service.get_login_token(email, username, password)
-
+    # Set the token as a cookie
+    response.set_cookie(
+        key="token",
+        value=login_token,
+        httponly=True,
+        path="/",
+        max_age=3600  # 1 hour
+    )
     return {
             "user": {
             "username": username,
@@ -130,6 +138,7 @@ def resolve_register(_, info, input):
 
 @mutation.field("login")
 def resolve_login(_, info, input):
+    response: Response = info.context["response"] 
     token = input.get("githubToken")
     password = input.get("password")
     if token:
@@ -144,7 +153,16 @@ def resolve_login(_, info, input):
     user_details = user_manager.get_user(username=username, email=email)
     if not user_details:
         raise Exception("User not found")
-
+    
+    login_token = cognito_service.get_login_token(email, username, password)
+    # Set the token as a cookie
+    response.set_cookie(
+        key="token",
+        value=login_token,
+        httponly=True,
+        path="/",
+        max_age=3600  # 1 hour
+    )
     return {
         "user": {
             "username": user_details["username"],
@@ -153,7 +171,7 @@ def resolve_login(_, info, input):
             "rank": user_details["rating"],
             "userId": user_details["userId"]
         },
-        "token": cognito_service.get_login_token(email, username, password),
+        "token": login_token,
         "githubToken": token
     }
 

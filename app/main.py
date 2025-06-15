@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from routes import sse_route
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, Response
 import os
 from ariadne.asgi import GraphQL
 from config import UPLOAD_DIR
@@ -16,6 +16,15 @@ app = FastAPI(
     description="API to handle multi-file code submissions and execution",
     version="1.0.0",
 )
+
+@app.middleware("http")
+async def add_response_to_context(request: Request, call_next):
+    response = Response()
+    request.state.response = response
+    response = await call_next(request)
+    return response
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Only enforce authentication on protected APIs
@@ -24,7 +33,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 # Parse the request body to inspect the GraphQL query
                 body = await request.json()
                 query = body.get("query", "")
-                print("GraphQL query:", query)
                 # Skip authentication for login and register mutations
                 if "mutation" in query and ("login" in query or "register" in query) or "githubUsernameEmail" in query:
                     print("Skipping authentication for login or register mutation")
@@ -76,10 +84,11 @@ app.include_router(sse_route.router, prefix="/api/v1", tags=["SSE"])
 
 
 @app.post("/graphql")
-async def graphql_server(request: Request, background_tasks: BackgroundTasks):
+async def graphql_server(request: Request, background_tasks: BackgroundTasks, response: Response):
     context = {
         "request": request,
         "background_tasks": background_tasks,
+        "response": response
     }
     graphql = GraphQL(schema, context_value=context)
     return await graphql.handle_request(request)
