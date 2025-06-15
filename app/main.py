@@ -9,7 +9,7 @@ from graphqls.resolvers.resolver import schema
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from services.cognito_service import verify_auth_token
-
+from dao.user_dao import UserDao
 
 app = FastAPI(
     title="LLDify Platform",
@@ -18,8 +18,22 @@ app = FastAPI(
 )
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Only enforce authentication on protected endpoints:
-        if request.url.path.startswith("/graphql") or request.url.path.startswith("/api/v1"):
+        # Only enforce authentication on protected APIs
+        if request.url.path == "/graphql":
+            try:
+                # Parse the request body to inspect the GraphQL query
+                body = await request.json()
+                query = body.get("query", "")
+                print("GraphQL query:", query)
+                # Skip authentication for login and register mutations
+                if "mutation" in query and ("login" in query or "register" in query) or "githubUsernameEmail" in query:
+                    print("Skipping authentication for login or register mutation")
+                    return await call_next(request)
+            except Exception as e:
+                print(f"Error parsing GraphQL query: {e}")
+                raise HTTPException(status_code=500, detail="Internal server error")
+
+            # Enforce authentication for other APIs
             auth_header = request.headers.get("Authorization")
             if not auth_header:
                 raise HTTPException(status_code=401, detail="Authorization header missing")
@@ -30,8 +44,18 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 raise HTTPException(status_code=401, detail="Invalid Authorization header format")
 
             token = parts[1]
-            # Verify the token (this will raise an HTTPException if invalid)
-            verify_auth_token(token)
+            try:
+                # Get email from the token
+                email = verify_auth_token(token)
+
+                # Fetch userId using email
+                user_dao = UserDao()
+                user_id = user_dao.get_user_id_by_email(email)
+
+                # Attach userId to the request state
+                request.state.user_id = user_id
+            except Exception as e:
+                raise HTTPException(status_code=401, detail=str(e))
         response = await call_next(request)
         return response
 

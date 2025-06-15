@@ -4,7 +4,23 @@ from models.db.tables import UserMetadata, ProblemMetadata, UserStats
 from dao.connection import get_db
 
 class UserDao:
-    
+
+ def get_user_id_by_email(self, email: str) -> int:
+        """
+        Fetch the userId from UserMetadata using the email.
+
+        :param email: Email of the user
+        :return: userId if found, else raises an exception
+        """
+        session = next(get_db())
+        try:
+            user = session.query(UserMetadata).filter(UserMetadata.email == email).first()
+            if not user:
+                raise Exception(f"User with email {email} not found")
+            return user.userId
+        except Exception as e:
+            print(f"Error fetching userId by email: {e}")
+            raise
  def put_user(self, username: str, email: str, created_at) -> Optional[int]:
     """
     Insert a new user into the database and create associated UserStats.

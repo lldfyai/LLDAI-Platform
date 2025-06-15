@@ -71,7 +71,12 @@ def verify_auth_token(auth_token: str) -> dict:
     if not decoded_token.get("email_verified", False):
         raise HTTPException(status_code=403, detail="Email not verified")
 
-    return decoded_token
+    # Extract email from the token
+    email = decoded_token.get("email")
+    if not email:
+        raise HTTPException(status_code=401, detail="Email not found in token")
+
+    return email
 
 def check_user_exists(email: str) -> bool:
     """
