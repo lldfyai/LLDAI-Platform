@@ -40,7 +40,7 @@ def resolve_problem(_, info, problemId):
     return {
             "problemId": problem_metadata.problem_id,
             "problemTitle": problem_metadata.problem_title,
-            "difficulty": problem_metadata.difficulty,
+            "difficulty": problem_metadata.difficulty.name if problem_metadata.difficulty else None,
             "tags": problem_metadata.tags,
             "timeLimit": problem_metadata.time_limit,
             "memoryLimit": problem_metadata.memory_limit,
