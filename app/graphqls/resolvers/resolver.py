@@ -47,6 +47,7 @@ def resolve_problem(_, info, problemId):
             "s3Path": problem_metadata.s3_path
     }
 
+
 @query.field("problems")
 def resolve_problems(_, info, userId):
     # Call the resolver function to fetch all problems for the user
@@ -198,7 +199,6 @@ def resolve_get_submission_metadata(_, info, problemId, userId):
     except Exception as e:
         print(f"Error resolving getSubmissionMetadata: {e}")
         return []
-
 
 @mutation.field("submitCode")
 async def resolve_submit_code(_, info, input):
