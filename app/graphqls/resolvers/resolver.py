@@ -119,9 +119,11 @@ def resolve_register(_, info, input):
     response.set_cookie(
         key="token",
         value=login_token,
-        httponly=True,
-        path="/",
-        max_age=3600  # 1 hour
+        httponly=True,  # Prevent JavaScript access
+        secure=True,    # Ensure the cookie is sent only over HTTPS
+        samesite="strict",  # Prevent cross-site requests
+        path="/",       # Cookie is valid for the entire site
+        max_age=3600    # 1 hour
     )
     return {
             "user": {
@@ -159,9 +161,11 @@ def resolve_login(_, info, input):
     response.set_cookie(
         key="token",
         value=login_token,
-        httponly=True,
-        path="/",
-        max_age=3600  # 1 hour
+        httponly=True,  # Prevent JavaScript access
+        secure=True,    # Ensure the cookie is sent only over HTTPS
+        samesite="strict",  # Prevent cross-site requests
+        path="/",       # Cookie is valid for the entire site
+        max_age=3600    # 1 hour
     )
     return {
         "user": {
