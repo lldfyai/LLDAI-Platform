@@ -119,9 +119,7 @@ def resolve_register(_, info, input):
     response.set_cookie(
         key="token",
         value=login_token,
-        httponly=True,  # Prevent JavaScript access
-        secure=True,    # Ensure the cookie is sent only over HTTPS
-        samesite="strict",  # Prevent cross-site requests
+        secure=False,    # Ensure the cookie is sent only over HTTPS
         path="/",       # Cookie is valid for the entire site
         max_age=3600    # 1 hour
     )

@@ -19,8 +19,6 @@ app = FastAPI(
 
 @app.middleware("http")
 async def add_response_to_context(request: Request, call_next):
-    response = Response()
-    request.state.response = response
     response = await call_next(request)
     return response
 
