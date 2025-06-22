@@ -57,7 +57,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 # Fetch userId using email
                 user_dao = UserDao()
                 user_id = user_dao.get_user_id_by_email(email)
-
+                print(f"Authenticated userId: {user_id}")
                 # Attach userId to the request state
                 request.state.user_id = user_id
             except Exception as e:
@@ -76,7 +76,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 # Add our custom authentication middleware
-#app.add_middleware(AuthMiddleware)
+app.add_middleware(AuthMiddleware)
 app.include_router(sse_route.router, prefix="/api/v1", tags=["SSE"])
 
 
