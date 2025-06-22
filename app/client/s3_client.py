@@ -1,6 +1,6 @@
 import boto3
 from config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-
+from botocore.exceptions import NoCredentialsError
     
 s3_client = boto3.client('s3',
     aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -41,3 +41,23 @@ def list_objects(bucket, prefix=None):
     except Exception as e:
         print(f"Error listing objects in bucket '{bucket}': {e}")
         return []
+    
+
+def fetch_s3_object_content(s3_key: str) -> str:
+    """
+    Fetch the content of an S3 object.
+
+    :param s3_key: Key of the S3 object (e.g., "1/code/Java/boilerPlateCode/Main.java")
+    :return: Content of the S3 object as a string
+    """
+    s3_client = boto3.client("s3")
+    bucket_name = "lldfy-problem-store"
+
+    try:
+        response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+        content = response["Body"].read().decode("utf-8")  # Decode the content
+        return content
+    except NoCredentialsError:
+        raise Exception("AWS credentials not found")
+    except Exception as e:
+        raise Exception(f"Error fetching S3 object content: {str(e)}")

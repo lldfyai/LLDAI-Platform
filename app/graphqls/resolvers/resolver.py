@@ -7,7 +7,8 @@ from services.submission_handler import SubmissionHandler
 from models.bl.submission import SubmissionRequest
 from models.bl.enums import SupportedLanguages
 from fastapi import Response
-
+import json
+from client.s3_client import fetch_s3_object_content  # Assuming this function fetches content from S3
 type_defs = load_schema_from_path("graphqls/schema/schema.graphql")
 
 query = QueryType()
@@ -32,19 +33,28 @@ submission_handler = SubmissionHandler(submission_manager=submission_manager)
 
 @query.field("problem")
 def resolve_problem(_, info, problemId):
-    # Call the resolver function to fetch the problem
+    # Fetch problem metadata from the database
     problem_metadata = problems_manager.get_problem(problemId)
-    if problem_metadata is None:
-        raise Exception(f"Problem with ID {problemId} not found.")
-    
+    if not problem_metadata:
+        raise Exception("Problem not found")
+
+    # Fetch the boilerplate code content from S3
+    s3_key = f"{problemId}/code/Java/boilerPlateCode/Main.java"  # Construct the S3 key
+    try:
+        boiler_plate_content = fetch_s3_object_content(s3_key)  # Fetch content from S3
+    except Exception as e:
+        raise Exception(f"Error fetching boilerplate code: {str(e)}")
+
+    # Return the problem details, including boilerplate code as a JSON object
     return {
-            "problemId": problem_metadata.problem_id,
-            "problemTitle": problem_metadata.problem_title,
-            "difficulty": problem_metadata.difficulty.name if problem_metadata.difficulty else None,
-            "tags": problem_metadata.tags,
-            "timeLimit": problem_metadata.time_limit,
-            "memoryLimit": problem_metadata.memory_limit,
-            "s3Path": problem_metadata.s3_path
+        "problemId": problem_metadata.problem_id,
+        "problemTitle": problem_metadata.problem_title,
+        "difficulty": problem_metadata.difficulty.name if problem_metadata.difficulty else None,
+        "tags": problem_metadata.tags,
+        "timeLimit": problem_metadata.time_limit,
+        "memoryLimit": problem_metadata.memory_limit,
+        "s3Path": problem_metadata.s3_path,
+        "boilerPlateCode": {"Main.java": boiler_plate_content}  # Return JSON object
     }
 
 
