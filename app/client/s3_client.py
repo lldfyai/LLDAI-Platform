@@ -42,24 +42,22 @@ def list_objects(bucket, prefix=None):
         print(f"Error listing objects in bucket '{bucket}': {e}")
         return []
     
-def get_signed_url_for_problem_id_boiler_plate(problem_id: int) -> str:
-    """
-    Generate a signed URL for the boilerplate code of a given problem ID.
 
-    :param problem_id: ID of the problem
-    :return: Signed URL for the boilerplate code
+def fetch_s3_object_content(s3_key: str) -> str:
     """
+    Fetch the content of an S3 object.
+
+    :param s3_key: Key of the S3 object (e.g., "1/code/Java/boilerPlateCode/Main.java")
+    :return: Content of the S3 object as a string
+    """
+    s3_client = boto3.client("s3")
     bucket_name = "lldfy-problem-store"
-    object_key = f"{problem_id}/code/Java/boilerPlateCode/Main.java"  # Construct the S3 path
 
     try:
-        signed_url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": bucket_name, "Key": object_key},
-            ExpiresIn=3600  # URL valid for 1 hour
-        )
-        return signed_url
+        response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+        content = response["Body"].read().decode("utf-8")  # Decode the content
+        return content
     except NoCredentialsError:
         raise Exception("AWS credentials not found")
     except Exception as e:
-        raise Exception(f"Error generating signed URL: {str(e)}")
+        raise Exception(f"Error fetching S3 object content: {str(e)}")
