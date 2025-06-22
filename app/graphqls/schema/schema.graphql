@@ -22,7 +22,7 @@ type Problem {
     timeLimit: Float
     memoryLimit: Float
     s3Path: String,
-    boilerPlateCode: String
+    boilerPlateCode: JSON
 }
 
 type AuthResponse {

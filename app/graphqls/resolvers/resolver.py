@@ -45,7 +45,7 @@ def resolve_problem(_, info, problemId):
     except Exception as e:
         raise Exception(f"Error fetching boilerplate code: {str(e)}")
 
-    # Return the problem details, including boilerplate code as a JSON string
+    # Return the problem details, including boilerplate code as a JSON object
     return {
         "problemId": problem_metadata.problem_id,
         "problemTitle": problem_metadata.problem_title,
@@ -54,7 +54,7 @@ def resolve_problem(_, info, problemId):
         "timeLimit": problem_metadata.time_limit,
         "memoryLimit": problem_metadata.memory_limit,
         "s3Path": problem_metadata.s3_path,
-        "boilerPlateCode": json.dumps({"Main.java": boiler_plate_content})  # Return JSON string
+        "boilerPlateCode": {"Main.java": boiler_plate_content}  # Return JSON object
     }
 
 
