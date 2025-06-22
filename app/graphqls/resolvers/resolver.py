@@ -37,6 +37,8 @@ def resolve_problem(_, info, problemId):
     if problem_metadata is None:
         raise Exception(f"Problem with ID {problemId} not found.")
     
+    # Generate signed URL for the boilerplate code
+    boiler_plate_url = get_signed_url_for_problem_id_boiler_plate(problemId)
     return {
             "problemId": problem_metadata.problem_id,
             "problemTitle": problem_metadata.problem_title,
@@ -44,7 +46,8 @@ def resolve_problem(_, info, problemId):
             "tags": problem_metadata.tags,
             "timeLimit": problem_metadata.time_limit,
             "memoryLimit": problem_metadata.memory_limit,
-            "s3Path": problem_metadata.s3_path
+            "s3Path": problem_metadata.s3_path,
+            "boilerPlateCodePath": boiler_plate_url
     }
 
 

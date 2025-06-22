@@ -21,7 +21,8 @@ type Problem {
     tags: [String]
     timeLimit: Float
     memoryLimit: Float
-    s3Path: String
+    s3Path: String,
+    boilerPlateCodePath: String
 }
 
 type AuthResponse {

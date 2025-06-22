@@ -1,6 +1,6 @@
 import boto3
 from config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-
+from botocore.exceptions import NoCredentialsError
     
 s3_client = boto3.client('s3',
     aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -41,3 +41,25 @@ def list_objects(bucket, prefix=None):
     except Exception as e:
         print(f"Error listing objects in bucket '{bucket}': {e}")
         return []
+    
+def get_signed_url_for_problem_id_boiler_plate(problem_id: int) -> str:
+    """
+    Generate a signed URL for the boilerplate code of a given problem ID.
+
+    :param problem_id: ID of the problem
+    :return: Signed URL for the boilerplate code
+    """
+    bucket_name = "lldfy-problem-store"
+    object_key = f"{problem_id}/code/Java/boilerPlateCode/Main.java"  # Construct the S3 path
+
+    try:
+        signed_url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": object_key},
+            ExpiresIn=3600  # URL valid for 1 hour
+        )
+        return signed_url
+    except NoCredentialsError:
+        raise Exception("AWS credentials not found")
+    except Exception as e:
+        raise Exception(f"Error generating signed URL: {str(e)}")
